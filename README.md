@@ -10,7 +10,9 @@
 git clone https://github.com/Yingka10/web_project.git
 cd web_project
 ```
+!!要先`pip install pillow`  才可以處理影像
 
+---
 要如何登入admin
 
 GitHub Copilot: 要登入 Django Admin，請按照以下步驟操作：
