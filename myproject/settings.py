@@ -119,7 +119,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'templates'),  # 確保指向包含 CSS 的目錄
+    os.path.join(BASE_DIR, 'static'),  # 確保指向包含 CSS 的目錄
 ]
 
 # Default primary key field type
