@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 
@@ -8,9 +8,8 @@ from django.http import JsonResponse
 import json
 
 def homepage(request):
-    now = datetime.now()
-    students = ['Alice', 'Bob', 'Charlie', 'Diana']
-    return render(request, "index.html", locals())
+    products = Post.objects.all()  # 獲取所有商品
+    return render(request, "index.html", {'products': products})
 
 def get_db_result(request):
     posts = Post.objects.all()
@@ -70,3 +69,19 @@ def api(request):
     else:
         # Method not allowed
         return JsonResponse({'error': 'Only GET and POST methods are supported'}, status=405)
+    
+def product_detail(request, id):
+    product = get_object_or_404(Post, id=id)
+    return render(request, "product_detail.html", {'product': product})
+
+def register(request):
+    return render(request, "register.html")
+
+def login(request):
+    return render(request, "login.html")
+
+def profile(request):
+    return render(request, "profile.html")
+
+def sell(request):
+    return render(request, "sell.html")
