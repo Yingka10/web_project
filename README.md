@@ -1,9 +1,8 @@
 # web_project
 網頁程式設計期末project
 
-我把老師的Django範例檔下載然後再用boostrap的模板套上去，到時候可以重新選模板  
-模板: https://startbootstrap.com/template/shop-homepage#google_vignette  
-(這個網站是老師簡報給的只有找到一個購物網站的模板所以先隨便套一下)    
+現在的資料庫只有商品的，登入註冊的帳戶都還沒用，還有上傳商品也還沒用到資料庫  
+商品分類也還沒調，這些就是個大概
   
 下載語法：
 ```bash
