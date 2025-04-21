@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from mywebsite.views import homepage, get_db_result, api, register, login, profile, sell, product_detail, category_products
+from mywebsite import views
 
 urlpatterns = [
     path('', homepage, name='index'),
@@ -31,6 +32,7 @@ urlpatterns = [
     path('product/<int:id>/', product_detail, name='product_detail'),
     path('admin/', admin.site.urls),
     path('category/<int:category_id>/', category_products, name='category_products'),
+    path('search/', views.product_search, name='product_search'),
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:
