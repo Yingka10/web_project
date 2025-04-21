@@ -18,7 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from mywebsite.views import homepage, get_db_result, api, register, login, profile, sell, product_detail
+from mywebsite.views import homepage, get_db_result, api, register, login, profile, sell, product_detail, category_products
+
 urlpatterns = [
     path('', homepage, name='index'),
     path('get_db_result/', get_db_result, name='get_db_result'),
@@ -26,9 +27,10 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('login/', login, name='login'),
     path('profile/', profile, name='profile'),
-    path('sell/', sell, name='sell'),
-    path('product/<int:id>/', product_detail, name='product_detail'),  # 定義 product_detail
+    path('sell/', sell, name='sell'), # sell 頁面的 URL
+    path('product/<int:id>/', product_detail, name='product_detail'),
     path('admin/', admin.site.urls),
+    path('category/<int:category_id>/', category_products, name='category_products'),
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:

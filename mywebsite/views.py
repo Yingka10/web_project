@@ -1,15 +1,16 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 
-from mywebsite.models import Post
+from mywebsite.models import Post,Category
 
 from django.http import JsonResponse
 import json
 
 def homepage(request):
     products = Post.objects.all()  # 獲取所有商品
-    return render(request, "index.html", {'products': products})
+    categories = Category.objects.all()  # 獲取所有分類
+    return render(request, "index.html", {'products': products, 'categories': categories})
 
 def get_db_result(request):
     posts = Post.objects.all()
@@ -74,6 +75,12 @@ def product_detail(request, id):
     product = get_object_or_404(Post, id=id)
     return render(request, "product_detail.html", {'product': product})
 
+def category_products(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    # 透過 models.ForeignKey 的 related_name 反查該分類下的所有商品
+    products = category.posts.all()
+    return render(request, "category_products.html", {'category': category, 'products': products})
+
 def register(request):
     return render(request, "register.html")
 
@@ -84,4 +91,32 @@ def profile(request):
     return render(request, "profile.html")
 
 def sell(request):
+    if request.method == 'POST':
+        # 處理表單提交
+        # 從 request.POST 獲取文字資料
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        # 從 request.FILES 獲取檔案資料
+        image = request.FILES.get('image')
+
+        # 簡單的驗證 (確保必要欄位存在)
+        if name and description and price and image:
+            # 創建 Post 物件並儲存到資料庫
+            # 注意：表單中的 'name' 對應模型的 'title'
+            Post.objects.create(
+                title=name,
+                body=description,
+                price=price,
+                image=image
+            )
+            # 新增成功後，重定向到首頁，使用者就能看到新上架的商品
+            return redirect('index')
+        else:
+            # 如果資料不完整，可以選擇顯示錯誤訊息或重新渲染表單
+            # 這裡我們先簡單地重新渲染空表單
+            # 更完善的做法是使用 Django Forms 來處理驗證和錯誤顯示
+            return render(request, "sell.html", {'error': '請填寫所有欄位並上傳圖片'})
+
+    # 如果是 GET 請求，像之前一樣顯示空表單
     return render(request, "sell.html")
