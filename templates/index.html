@@ -30,13 +30,18 @@
               商品分類
             </a>
             <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
-              <li><a class="dropdown-item" href="#">課本</a></li>
-              <li><a class="dropdown-item" href="#">生活用品</a></li>
-              <li><a class="dropdown-item" href="#">家電</a></li>
-              <li><a class="dropdown-item" href="#">其他</a></li>
+              {% for category in categories %}
+                <li>
+                  <a class="dropdown-item" href="{% url 'category_products' category.id %}">
+                    {{ category.name }}
+                  </a>
+                </li>
+              {% empty %}
+                <li>
+                  <a class="dropdown-item" href="#">目前沒有分類</a>
+                </li>
+              {% endfor %}
             </ul>
-          </li>
-        </ul>
         <!-- 搜尋表單 -->
         <form class="d-flex me-2">
           <input class="form-control me-2" type="search" placeholder="搜尋商品" aria-label="搜尋">

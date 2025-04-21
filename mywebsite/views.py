@@ -2,14 +2,15 @@ from django.shortcuts import render, get_object_or_404
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 
-from mywebsite.models import Post
+from mywebsite.models import Post,Category
 
 from django.http import JsonResponse
 import json
 
 def homepage(request):
     products = Post.objects.all()  # 獲取所有商品
-    return render(request, "index.html", {'products': products})
+    categories = Category.objects.all()  # 獲取所有分類
+    return render(request, "index.html", {'products': products, 'categories': categories})
 
 def get_db_result(request):
     posts = Post.objects.all()
@@ -73,6 +74,12 @@ def api(request):
 def product_detail(request, id):
     product = get_object_or_404(Post, id=id)
     return render(request, "product_detail.html", {'product': product})
+
+def category_products(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    # 透過 models.ForeignKey 的 related_name 反查該分類下的所有商品
+    products = category.posts.all()
+    return render(request, "category_products.html", {'category': category, 'products': products})
 
 def register(request):
     return render(request, "register.html")
