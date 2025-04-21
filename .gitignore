@@ -32,3 +32,6 @@ dist/
 build/
 *.egg-info/
 .eggs/
+
+# 忽略開發用的 SQLite 資料庫檔案
+db.sqlite3
