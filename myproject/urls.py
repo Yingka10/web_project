@@ -27,8 +27,8 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('login/', login, name='login'),
     path('profile/', profile, name='profile'),
-    path('sell/', sell, name='sell'),
-    path('product/<int:id>/', product_detail, name='product_detail'),  # 定義 product_detail
+    path('sell/', sell, name='sell'), # sell 頁面的 URL
+    path('product/<int:id>/', product_detail, name='product_detail'),
     path('admin/', admin.site.urls),
     path('category/<int:category_id>/', category_products, name='category_products'),
 ]
