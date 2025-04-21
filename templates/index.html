@@ -43,9 +43,11 @@
               {% endfor %}
             </ul>
         <!-- 搜尋表單 -->
-        <form class="d-flex me-2">
-          <input class="form-control me-2" type="search" placeholder="搜尋商品" aria-label="搜尋">
-          <button class="btn btn-outline-success" type="submit">搜尋</button>
+        <form method="get" action="{% url 'product_search' %}" class="mb-4">
+          <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="請輸入關鍵字搜尋商品" required>
+            <button class="btn btn-primary" type="submit">搜尋</button>
+          </div>
         </form>
         <!-- 右側功能按鈕 -->
         <div class="d-flex">
