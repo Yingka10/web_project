@@ -12,54 +12,105 @@ cd web_project
 !!要先`pip install pillow`  才可以處理影像
 
 ---
-要如何登入admin
-
-GitHub Copilot: 要登入 Django Admin，請按照以下步驟操作：
+當然可以！以下是一份專為你的 Django 團隊量身打造的 `README.md` 範本，說明如何安裝環境、設定 `.env`、啟動專案等等，清楚又好懂👇
 
 ---
 
-### 1. **啟動開發伺服器**
-在終端機中執行以下命令啟動伺服器：
+
+# 🛍️ 二手交易平台專案
+
+這是一個使用 Django 建立的校園二手交易平台，團隊協作開發中。歡迎你加入開發！
+
+---
+
+## 🚀 快速開始
+
+### ✅ 1. 安裝套件
+
+請先安裝必要的 Python 套件（建議使用虛擬環境）：
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 🔑 2. 設定環境變數 `.env`
+
+請根據 `.env.example` 建立你自己的 `.env` 檔案：
+
+```bash
+cp .env.example .env
+```
+
+打開 `.env` 並填入資料，例如：
+
+```env
+DEBUG=True
+SECRET_KEY=這邊請填佳穎的 secret key
+DATABASE_URL=postgres://帳號:密碼@host:port/資料庫名稱
+```
+
+如果你是使用我們統一的雲端資料庫，請洽組長索取正確連線字串。
+
+> ⚠️ `.env` 是機密檔案，**不要上傳到 GitHub！**
+
+---
+
+### 🛠️ 3. 執行資料庫遷移
+
+確保你的資料庫有正確連線後，執行：
+
+```bash
+python manage.py migrate
+```
+
+---
+
+### 🌐 4. 啟動本地伺服器
+
+啟動開發伺服器：
 
 ```bash
 python manage.py runserver
 ```
 
-伺服器啟動後，訪問以下網址進入 Django Admin 登入頁面：
-
-[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
+然後在瀏覽器打開 `http://127.0.0.1:8000` 即可進入網站！
 
 ---
 
-### 2. **建立超級使用者**
-如果您還沒有超級使用者帳號，請執行以下命令來建立：
+## 📁 專案結構說明
 
-```bash
-python manage.py createsuperuser
+```
+your_project/
+├── myproject/         ← Django 主設定檔
+├── mywebsite/         ← 你開發的 App
+├── templates/         ← HTML 樣板
+├── static/            ← CSS / JS / 圖片
+├── media/             ← 使用者上傳的圖片
+├── .env               ← 環境變數（不上傳）
+├── .env.example       ← 環境變數樣板（供參考）
+├── manage.py
+└── README.md
 ```
 
-系統會提示您輸入以下資訊：
+---
 
-1. **使用者名稱**：輸入您想要的管理員帳號名稱。
-2. **電子郵件地址**：輸入有效的電子郵件地址（可選）。
-3. **密碼**：輸入密碼，並再次確認。
+## 👥 團隊開發注意事項
 
-完成後，系統會顯示訊息，確認超級使用者已建立。
+- 請先 `git pull` 再開發，避免衝突
+- 新增功能請開新 branch，測試後再合併
+- 若資料庫有異動（models.py 改動），請一起分享 migration 指令！
 
 ---
 
-### 3. **登入 Django Admin**
-1. 打開瀏覽器，訪問 [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)。
-2. 使用剛剛建立的超級使用者帳號和密碼登入。
+## ❓常見問題
 
----
+### 無法連到資料庫？
+- 檢查 `.env` 裡的 `DATABASE_URL` 是否正確
+- 是否已經跑 `migrate`
 
-### 4. **管理 `Post` 模型**
-您已經在 admin.py 中註冊了 `Post` 模型：
-
-```python
-admin.site.register(Post)
-```
-
-登入後，您應該可以在 Django Admin 中看到 `Post` 模型，並可以新增、編輯或刪除商品資料。
+### 啟動時出現 `SECRET_KEY` 錯誤？
+- 檢查 `.env` 是否有填入 `SECRET_KEY`
+- `settings.py` 是否有正確讀取環境變數
 
