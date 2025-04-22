@@ -55,6 +55,104 @@
                       <a href="{% url 'register' %}" class="btn btn-secondary me-2">註冊</a>
                       <a href="{% url 'sell' %}" class="btn btn-warning">出售</a>
                   {% endif %}
+  <!-- 導航列 -->
+  <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light shadow">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'index' %}">二手拍賣平台</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
+        aria-label="切換導航">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <!-- 左側導航選單 -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'index' %}">首頁</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              商品分類
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+              {% for category in categories %}
+                <li>
+                  <a class="dropdown-item" href="{% url 'category_products' category.id %}">
+                    {{ category.name }}
+                  </a>
+                </li>
+              {% empty %}
+                <li>
+                  <a class="dropdown-item" href="#">目前沒有分類</a>
+                </li>
+              {% endfor %}
+            </ul>
+        <!-- 搜尋表單 -->
+        <form method="get" action="{% url 'product_search' %}" class="mb-4">
+          <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="請輸入關鍵字搜尋商品" required>
+            <button class="btn btn-primary" type="submit">搜尋</button>
+          </div>
+        </form>
+        <!-- 右側功能按鈕 -->
+        <div class="d-flex">
+          {% if user.is_authenticated %}
+            <a href="{% url 'profile' %}" class="btn btn-outline-dark me-2">個人頁面</a>
+            <a href="{% url 'sell' %}" class="btn btn-warning">出售</a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary me-2">登入</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary me-2">註冊</a>
+            <a href="{% url 'sell' %}" class="btn btn-warning">出售</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero 區塊 -->
+  <section class="hero">
+    <div class="container">
+      <h1>歡迎來到二手拍賣平台</h1>
+      <p>輕鬆買賣，資源共享</p>
+    </div>
+  </section>
+
+  <!-- 最新上架區塊 -->
+  <section class="py-5">
+    <div class="container">
+      <div class="mb-4">
+        <h2>最新上架</h2>
+      </div>
+      <div class="row g-4">
+        {% for product in products %}
+        <div class="col-md-4">
+          <div class="card product-card shadow-sm">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
+            {% else %}
+            <img src="{% static 'images/default.jpg' %}" class="card-img-top" alt="預設圖片">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ product.title }}</h5>
+              <p class="card-text">{{ product.body }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-primary fw-bold">${{ product.price }}</span>
+                <div>
+                  <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-primary">查看詳情</a>
+                  {% if user.is_authenticated %}
+                    <a href="{% url 'toggle_favorite' product.id %}" 
+                       class="btn btn-sm btn-outline-warning ms-2">
+                      {% if user in product.favorites.all %}
+                        移除收藏
+                      {% else %}
+                        加入收藏
+                      {% endif %}
+                    </a>
+                  {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-sm btn-outline-warning ms-2">加入收藏</a>
+                  {% endif %}
+                </div>
               </div>
           </div>
         </div>

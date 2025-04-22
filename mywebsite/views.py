@@ -3,6 +3,7 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from mywebsite.models import Post,Category
+from django.contrib.auth.decorators import login_required
 
 from django.http import JsonResponse
 import json
@@ -15,6 +16,26 @@ def homepage(request):
 def get_db_result(request):
     posts = Post.objects.all()
     return render(request, "index_get_db_result.html", locals())
+
+@login_required
+def toggle_favorite(request, id):
+    product = get_object_or_404(Post, id=id)
+    # 如果目前使用者已收藏此商品，就移除；否則加入收藏
+    if request.user in product.favorites.all():
+        product.favorites.remove(request.user)
+    else:
+        product.favorites.add(request.user)
+    # 重導回前一個頁面
+    return redirect(request.META.get('HTTP_REFERER', 'index'))
+
+@login_required
+def profile(request):
+    favorites = request.user.favorite_posts.all()
+    my_posts = request.user.posts.all()
+    return render(request, "profile.html", {
+        'favorites': favorites,
+        'my_posts': my_posts,
+    })
 
 @csrf_exempt
 def api(request):
@@ -87,8 +108,6 @@ def register(request):
 def login(request):
     return render(request, "login.html")
 
-def profile(request):
-    return render(request, "profile.html")
 
 def sell(request):
     if request.method == 'POST':
@@ -108,7 +127,8 @@ def sell(request):
                 title=name,
                 body=description,
                 price=price,
-                image=image
+                image=image,
+                owner=request.user
             )
             # 新增成功後，重定向到首頁，使用者就能看到新上架的商品
             return redirect('index')
