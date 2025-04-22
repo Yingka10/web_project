@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
-
+from django.db.models import Q
 from mywebsite.models import Post,Category
 
 from django.http import JsonResponse
@@ -120,3 +120,23 @@ def sell(request):
 
     # 如果是 GET 請求，像之前一樣顯示空表單
     return render(request, "sell.html")
+
+def product_search(request):
+    # 從 GET 請求中取得關鍵字，參數名稱 "q" 可以依需求修改
+    query = request.GET.get('q', '')
+    
+    # 如果有輸入關鍵字，則進行搜尋
+    if query:
+        # 使用 Q 可在多個欄位中進行搜尋，例如商品標題和內文
+        results = Post.objects.filter(
+            Q(title__icontains=query) | Q(body__icontains=query)
+        )
+    else:
+        # 如果沒有輸入關鍵字，可以傳回空的 QuerySet 或全部商品，視需求而定
+        results = Post.objects.none()
+    
+    context = {
+        'query': query,
+        'results': results,
+    }
+    return render(request, "product_search.html", context)
