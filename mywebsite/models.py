@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Category(models.Model):
     name = models.CharField("分類名稱", max_length=100, unique=True)
@@ -26,6 +27,22 @@ class Post(models.Model):
         null=True,
         blank=True  # 若商品不一定要分類，可以設置 blank=True
     )
+    # 新增「收藏」欄位，儲存哪些使用者收藏此商品
+    favorites = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name='favorite_posts',
+        verbose_name="收藏的使用者"
+    )
+    # 上架者欄位：記錄誰發佈了這個商品
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='posts',
+        verbose_name="賣家",
+        null=True,
+        blank=True
+    )
 
     class Meta:
         ordering = ('-pub_date',)
@@ -33,5 +50,3 @@ class Post(models.Model):
     def __str__(self):
         return self.title
     
-
-
