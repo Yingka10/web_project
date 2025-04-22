@@ -33,5 +33,3 @@ build/
 *.egg-info/
 .eggs/
 
-# env有個人機密資訊
-.env
