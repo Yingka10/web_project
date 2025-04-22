@@ -10,5 +10,16 @@
     <img src="{{ product.image.url }}" alt="{{ product.name }}">
     <p>{{ product.description }}</p>
     <p>價格: ${{ product.price }}</p>
+
+    <!-- 收藏功能區塊 -->
+    {% if user.is_authenticated %}
+    {% if user in product.favorites.all %}
+        <a href="{% url 'toggle_favorite' product.id %}">取消收藏</a>
+    {% else %}
+        <a href="{% url 'toggle_favorite' product.id %}">加入收藏</a>
+    {% endif %}
+    {% else %}
+    <p>請先<a href="{% url 'login' %}">登入</a>以收藏此商品</p>
+    {% endif %}
 </body>
 </html>
