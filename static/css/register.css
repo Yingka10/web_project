@@ -1,0 +1,57 @@
+body {
+    background-color: #f8f9fa; /* Bootstrap 的淺灰色背景 */
+}
+
+.register-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%; /* 預設寬度為 100% */
+    max-width: 400px; /* 在較大螢幕上限制最大寬度 */
+}
+
+h1 {
+    color: #343a40; /* Bootstrap 的深灰色文字 */
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-label {
+    font-weight: bold;
+    color: #495057; /* Bootstrap 的灰色文字 */
+}
+
+.form-control {
+    margin-bottom: 20px;
+    border: 1px solid #ced4da; /* Bootstrap 的邊框顏色 */
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff; /* Bootstrap 的主要藍色 */
+    border-color: #007bff;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    width: 100%; /* 按鈕寬度佔滿容器 */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.error-message {
+    color: #dc3545; /* Bootstrap 的紅色 */
+    margin-top: 10px;
+    font-size: 0.875rem;
+}
