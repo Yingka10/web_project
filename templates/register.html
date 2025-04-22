@@ -16,25 +16,11 @@
                     <h1 class="mb-3">註冊帳號</h1>
                     <form method="post">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="username" class="form-label">使用者名稱:</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">電子郵件:</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">密碼:</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password_confirm" class="form-label">確認密碼:</label>
-                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">註冊</button>
+                        {{ form.as_p }} {# 使用 Django form 渲染所有表單欄位為段落 #}
+
+                        <button type="submit" class="btn btn-primary w-100">註冊</button>
                         {% if form.errors %}
-                            <div class="error-message mt-3">
+                            <div class="alert alert-danger mt-3" role="alert">
                                 {% for field in form %}
                                     {% for error in field.errors %}
                                         <div>{{ field.label }}: {{ error }}</div>

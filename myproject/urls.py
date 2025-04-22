@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from mywebsite.views import homepage, get_db_result, api, register, login, profile, sell, product_detail, category_products
 from mywebsite import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', homepage, name='index'),
@@ -34,6 +35,7 @@ urlpatterns = [
     path('category/<int:category_id>/', category_products, name='category_products'),
     path('search/', views.product_search, name='product_search'),
     path('toggle_favorite/<int:id>/', views.toggle_favorite, name='toggle_favorite'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'), # 加入登出 URL，登出後導向首頁
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:

@@ -4,7 +4,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from mywebsite.models import Post,Category
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login as auth_login, authenticate
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import json
 
@@ -103,10 +105,36 @@ def category_products(request, category_id):
     return render(request, "category_products.html", {'category': category, 'products': products})
 
 def register(request):
-    return render(request, "register.html")
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()  # 建立新使用者
+            auth_login(request, user) # 註冊後自動登入 (可選)
+            return redirect('index')  # 註冊成功後導向首頁
+    else:
+        form = UserCreationForm()
+    return render(request, "register.html", {'form': form}) # 將 form 傳遞給模板
 
 def login(request):
-    return render(request, "login.html")
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
+                # 可以加上 ?next=/some/path 來導向登入前的頁面
+                return redirect('index') # 登入成功後導向首頁
+            else:
+                # 可以加入無效登入的錯誤訊息
+                pass
+        else:
+            # 可以加入表單無效的錯誤訊息
+            pass
+    else:
+        form = AuthenticationForm()
+    return render(request, "login.html", {'form': form}) # 將 form 傳遞給模板
 
 
 def sell(request):
