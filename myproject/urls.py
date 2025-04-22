@@ -33,6 +33,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('category/<int:category_id>/', category_products, name='category_products'),
     path('search/', views.product_search, name='product_search'),
+    path('', include('accounts.urls')),
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:
