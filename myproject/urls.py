@@ -18,13 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from mywebsite.views import homepage, get_db_result, api, register, login, profile, sell, product_detail, category_products
+from mywebsite.views import homepage, api, register, login, profile, sell, product_detail, category_products
 from mywebsite import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', homepage, name='index'),
-    path('get_db_result/', get_db_result, name='get_db_result'),
     path('api/', api, name='api'),
     path('register/', register, name='register'),
     path('login/', login, name='login'),
