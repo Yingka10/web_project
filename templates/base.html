@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <!-- 導覽列 -->
+    <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light shadow">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" height="120">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent" aria-controls="navbarContent"
+                    aria-expanded="false" aria-label="切換導航">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-start align-items-center" id="navbarContent">
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'index' %}">首頁</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            商品分類
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+                            {% for category in categories %}
+                                <li><a class="dropdown-item" href="{% url 'category_products' category.id %}">{{ category.name }}</a></li>
+                            {% empty %}
+                                <li><a class="dropdown-item" href="#">目前沒有分類</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- 搜尋列 -->
+                <form class="d-flex mx-auto" style="width: 400px;" action="{% url 'product_search' %}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="搜尋商品" aria-label="搜尋">
+                    <button class="btn btn-outline-success" type="submit">搜尋</button>
+                </form>
+
+                <!-- 使用者狀態 -->
+                <div class="d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'logout' %}" method="post" class="ms-2 d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger">登出</button>
+                        </form>
+                        <a href="{% url 'profile' %}" class="btn btn-outline-dark ms-2">個人頁面</a>
+                        <a href="{% url 'sell' %}" class="btn btn-warning ms-2">出售</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary me-2">登入</a>
+                        <a href="{% url 'register' %}" class="btn btn-secondary me-2">註冊</a>
+                        <a href="{% url 'login' %}" class="btn btn-warning me-2">出售</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 頁面主內容區塊 -->
+    <main style="padding-top: 160px;">
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- 頁腳 -->
+    <footer class="py-4 mt-5 bg-light border-top">
+        <div class="container text-center">
+            <p class="mb-0">© 2025 中大二手・再續錢緣. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

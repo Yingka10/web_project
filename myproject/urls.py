@@ -35,6 +35,7 @@ urlpatterns = [
     path('search/', views.product_search, name='product_search'),
     path('toggle_favorite/<int:id>/', views.toggle_favorite, name='toggle_favorite'),
     path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'), # 加入登出 URL，登出後導向首頁
+    path('seller/<int:user_id>/', views.seller_profile, name='seller_profile'),
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:

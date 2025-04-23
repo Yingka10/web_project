@@ -11,6 +11,7 @@ from django.http import JsonResponse
 import json
 import cloudinary
 from django.conf import settings
+from django.contrib.auth.models import User
 
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
@@ -192,3 +193,11 @@ def product_search(request):
         'results': results,
     }
     return render(request, "product_search.html", context)
+
+def seller_profile(request, user_id):
+    seller = get_object_or_404(User, id=user_id)
+    seller_posts = seller.posts.all()
+    return render(request, "seller_profile.html", {
+        'seller': seller,
+        'seller_posts': seller_posts
+    })

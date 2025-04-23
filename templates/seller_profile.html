@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{ seller.username }}的賣場 - 中大二手{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ seller.username }} 的商品</h2>
+    <div class="row">
+        {% for post in seller_posts %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text">${{ post.price }}</p>
+                        <a href="{% url 'product_detail' post.id %}" class="btn btn-primary">查看詳情</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>這位賣家目前沒有商品上架。</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
