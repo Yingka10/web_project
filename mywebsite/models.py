@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary.models import CloudinaryField
 
 class Category(models.Model):
     name = models.CharField("分類名稱", max_length=100, unique=True)
@@ -16,7 +17,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)  # 新增價格欄位
-    image = models.ImageField(upload_to='products/', blank=True, null=True)  # 新增圖片欄位
+    image = CloudinaryField('image', blank=True, null=True)  # 使用 CloudinaryField
     pub_date = models.DateTimeField(auto_now_add=True)
     # 新增與 Category 的關聯，若你希望此欄位為必填就省略 null 與 blank 參數
     category = models.ForeignKey(

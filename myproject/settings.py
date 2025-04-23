@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mywebsite',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +91,14 @@ DATABASES = {
     }
 }
 
+# 使用 Cloudinary 作為默認的媒體存儲後端
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -120,8 +130,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Static files (CSS, JavaScript, Images)

@@ -9,6 +9,14 @@ from django.contrib.auth import login as auth_login, authenticate
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import json
+import cloudinary
+from django.conf import settings
+
+cloudinary.config(
+    cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=settings.CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=settings.CLOUDINARY_STORAGE['API_SECRET']
+)
 
 def homepage(request):
     products = Post.objects.all()  # 獲取所有商品
