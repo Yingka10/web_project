@@ -76,48 +76,63 @@
         </div>
     </section>
 
-<section class="py-5">
-  <div class="container">
-    <div class="mb-4">
-      <h2>最新上架</h2>
-    </div>
-    <div class="row g-4">
-      {% for product in products %}
-      <div class="col-md-4">
-        <div class="card product-card shadow-sm">
-          {% if product.image %}
-          <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
-          {% else %}
-          <img src="{% static 'images/logo.png' %}" class="card-img-top" alt="預設圖片">
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">{{ product.title }}</h5>
-            <p class="card-text">{{ product.body }}</p>
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="text-primary fw-bold">${{ product.price }}</span>
-              <div>
-                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-primary">查看詳情</a>
-                {% if user.is_authenticated %}
-                  <a href="{% url 'toggle_favorite' product.id %}"
-                     class="btn btn-sm btn-outline-warning ms-2">
-                    {% if user in product.favorites.all %}
-                      移除收藏
-                    {% else %}
-                      加入收藏
-                    {% endif %}
-                  </a>
-                {% else %}
-                  <a href="{% url 'login' %}" class="btn btn-sm btn-outline-warning ms-2">加入收藏</a>
-                {% endif %}
+    <section class="py-5">
+      <div class="container">
+        <div class="mb-4">
+          <h2>最新上架</h2>
+        </div>
+        <div class="row g-4">
+          {% for product in products %}
+          <div class="col-md-4">
+            {# 加入 position-relative 讓徽章可以定位 #}
+            <div class="card product-card shadow-sm h-100 position-relative">
+              {# +++ 已售出徽章 +++ #}
+              {% if product.is_sold %}
+                <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
+                {# 添加遮罩效果 #}
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 0;"></div>
+              {% endif %}
+    
+              {% if product.image %}
+              {# 圖片也加上效果 #}
+              <img src="{{ product.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+              {% else %}
+              <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
+              {% endif %}
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ product.title }}</h5>
+                {# 商品描述可選是否顯示或變淡 #}
+                <p class="card-text {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">{{ product.body|truncatewords:15 }}</p>
+                <div class="mt-auto d-flex justify-content-between align-items-center">
+                  <span class="text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">${{ product.price }}</span>
+                  <div>
+                      <a href="{% url 'product_detail' product.id %}" class="btn btn-sm {% if product.is_sold %}btn-secondary{% else %}btn-outline-primary{% endif %}">
+                          {% if product.is_sold %}已售出{% else %}查看詳情{% endif %}
+                      </a>
+                      {# 收藏按鈕也可以根據是否售出決定是否顯示/禁用 #}
+                      {% if not product.is_sold %}
+                          {% if user.is_authenticated %}
+                          <a href="{% url 'toggle_favorite' product.id %}"
+                            class="btn btn-sm btn-outline-warning ms-2">
+                            {% if user in product.favorites.all %}
+                              移除收藏
+                            {% else %}
+                              加入收藏
+                            {% endif %}
+                          </a>
+                          {% else %}
+                          <a href="{% url 'login' %}" class="btn btn-sm btn-outline-warning ms-2">加入收藏</a>
+                          {% endif %}
+                      {% endif %} {# end if not product.is_sold #}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          {% endfor %}
         </div>
       </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
+    </section>
               
     <footer class="py-4">
         <div class="container text-center">
