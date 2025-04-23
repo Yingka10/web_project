@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from cloudinary.models import CloudinaryField
+from django.utils import timezone
 
 class Category(models.Model):
     name = models.CharField("分類名稱", max_length=100, unique=True)
@@ -44,10 +45,27 @@ class Post(models.Model):
         null=True,
         blank=True
     )
+    # 新增：標記商品是否已被預約或售出 (可選，但建議)
+    is_reserved = models.BooleanField("已被預約", default=False)
+    is_sold = models.BooleanField("已售出", default=False)
+
 
     class Meta:
         ordering = ('-pub_date',)
 
     def __str__(self):
         return self.title
-    
+# +++ 新增 Reservation 模型 +++
+class Reservation(models.Model):
+    product = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reservations', verbose_name="預約商品")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations', verbose_name="預約者")
+    reserved_at = models.DateTimeField("預約時間", default=timezone.now)
+    # 可以考慮加入其他欄位，例如：預約狀態 (pending, confirmed, cancelled)
+
+    class Meta:
+        verbose_name = "預約紀錄"
+        verbose_name_plural = "預約紀錄"
+        unique_together = ('product', 'user') # 同一個使用者對同一個商品只能預約一次
+
+    def __str__(self):
+        return f"{self.user.username} 預約了 {self.product.title}"

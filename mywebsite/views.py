@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone # 引入 timezone
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
-from mywebsite.models import Post,Category
+from mywebsite.models import Post, Category, Reservation
+from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, authenticate
@@ -12,6 +14,8 @@ import json
 import cloudinary
 from django.conf import settings
 from django.contrib.auth.models import User
+
+
 
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
@@ -101,7 +105,29 @@ def api(request):
     
 def product_detail(request, id):
     product = get_object_or_404(Post, id=id)
-    return render(request, "product_detail.html", {'product': product})
+    reservations = None # 初始化為 None
+    is_owner = False # 標記當前使用者是否為擁有者
+
+    # 檢查當前登入使用者是否為商品擁有者
+    if request.user.is_authenticated and product.owner == request.user:
+        is_owner = True
+        # 如果是擁有者，則獲取該商品的所有預約紀錄
+        reservations = Reservation.objects.filter(product=product).order_by('-reserved_at')
+
+    context = {
+        'product': product,
+        'is_owner': is_owner,
+        'reservations': reservations, # 將預約列表傳遞給模板
+        # 可以加入判斷是否已預約的邏輯
+        'user_has_reserved': False # 預設使用者未預約
+    }
+
+    # 檢查當前登入使用者是否已預約此商品
+    if request.user.is_authenticated:
+        context['user_has_reserved'] = Reservation.objects.filter(product=product, user=request.user).exists()
+
+
+    return render(request, "product_detail.html", context) 
 
 def category_products(request, category_id):
     category = get_object_or_404(Category, id=category_id)
@@ -194,6 +220,70 @@ def product_search(request):
     }
     return render(request, "product_search.html", context)
 
+def seller_profile(request, user_id):
+    seller = get_object_or_404(User, id=user_id)
+    seller_posts = seller.posts.all()
+    return render(request, "seller_profile.html", {
+        'seller': seller,
+        'seller_posts': seller_posts
+    })
+# +++ 新增 reserve_product View +++
+@login_required
+def reserve_product(request, id):
+    product = get_object_or_404(Post, id=id)
+    user = request.user
+
+    # 檢查是否是商品擁有者，擁有者不能預約自己的商品
+    if product.owner == user:
+        messages.error(request, "您不能預約自己的商品。")
+        return redirect('product_detail', id=id)
+
+    # 檢查商品是否已售出或已被預約 (如果需要限制只能一人預約)
+    # if product.is_sold or product.is_reserved:
+    #     messages.warning(request, "此商品已被預約或已售出。")
+    #     return redirect('product_detail', id=id)
+
+    # 嘗試創建預約，利用 unique_together 防止重複預約
+    try:
+        reservation, created = Reservation.objects.get_or_create(
+            product=product,
+            user=user,
+            defaults={'reserved_at': timezone.now()} # 使用 timezone.now()
+        )
+        if created:
+            # (可選) 更新商品狀態
+            # product.is_reserved = True
+            # product.save()
+            messages.success(request, f"成功預約商品：{product.title}")
+        else:
+            messages.info(request, "您已經預約過此商品。")
+    except Exception as e:
+        messages.error(request, f"預約時發生錯誤: {e}")
+
+    return redirect('product_detail', id=id) # 重導回商品頁面
+
+# +++ (可選) 新增取消預約 View +++
+@login_required
+def cancel_reservation(request, id):
+    product = get_object_or_404(Post, id=id)
+    user = request.user
+
+    try:
+        reservation = Reservation.objects.get(product=product, user=user)
+        reservation.delete()
+        # (可選) 更新商品狀態，如果需要允許多人預約，這裡邏輯要調整
+        # maybe check if other reservations exist before setting is_reserved to False
+        # product.is_reserved = Reservation.objects.filter(product=product).exists()
+        # product.save()
+        messages.success(request, f"已取消預約商品：{product.title}")
+    except Reservation.DoesNotExist:
+        messages.warning(request, "您並未預約此商品。")
+    except Exception as e:
+        messages.error(request, f"取消預約時發生錯誤: {e}")
+
+    return redirect('product_detail', id=id)
+
+# ... (seller_profile view 保持不變) ...
 def seller_profile(request, user_id):
     seller = get_object_or_404(User, id=user_id)
     seller_posts = seller.posts.all()

@@ -4,61 +4,141 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">首頁</a></li>
+            {% if product.category %}
             <li class="breadcrumb-item">
                 <a href="{% url 'category_products' product.category.id %}">{{ product.category.name }}</a>
             </li>
+            {% endif %}
             <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
         </ol>
     </nav>
 
-    <!-- 商品詳細資訊 -->
+    {% if messages %}
+        <div class="alert alert-dismissible fade show
+            {% for message in messages %}
+                {% if message.tags == 'success' %} alert-success {% endif %}
+                {% if message.tags == 'warning' %} alert-warning {% endif %}
+                {% if message.tags == 'error' %} alert-danger {% endif %}
+                {% if message.tags == 'info' %} alert-info {% endif %}
+            {% endfor %}"
+            role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+
     <div class="row">
         <div class="col-md-6">
             {% if product.image %}
-                <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.title }}">
+                <img src="{{ product.image.url }}" class="img-fluid rounded mb-3" alt="{{ product.title }}">
             {% else %}
-                <img src="{% static 'images/default.jpg' %}" class="img-fluid" alt="預設圖片">
+                <img src="{% static 'images/default.jpg' %}" class="img-fluid rounded mb-3" alt="預設圖片">
             {% endif %}
         </div>
         <div class="col-md-6">
-            <h1 class="mb-4">{{ product.title }}</h1>
-            <p class="text-muted">分類: 
+            <h1 class="mb-3">{{ product.title }}</h1>
+            {% if product.category %}
+            <p class="text-muted">分類:
                 <a href="{% url 'category_products' product.category.id %}">
                     {{ product.category.name }}
                 </a>
             </p>
+            {% endif %}
             <p class="text-primary fs-4">價格: ${{ product.price }}</p>
             <p>{{ product.body }}</p>
+            {% if product.owner %}
             <p class="text-muted">
-                賣家: 
+                賣家:
                 <a href="{% url 'seller_profile' product.owner.id %}">
                     {{ product.owner.username }}
                 </a>
             </p>
-
-            <!-- 收藏功能區塊 -->
-            {% if user.is_authenticated %}
-                {% if user in product.favorites.all %}
-                    <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-danger">取消收藏</a>
-                {% else %}
-                    <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-primary">加入收藏</a>
-                {% endif %}
-            {% else %}
-                <p>請先<a href="{% url 'login' %}">登入</a>以收藏此商品</p>
             {% endif %}
+             <p class="text-muted small">發布時間: {{ product.pub_date|date:"Y/m/d H:i" }}</p>
+
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                {% if user.is_authenticated %}
+                    {% if user in product.favorites.all %}
+                        <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-danger">
+                           <i class="bi bi-heart-fill"></i> 取消收藏
+                        </a>
+                    {% else %}
+                         <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-primary">
+                            <i class="bi bi-heart"></i> 加入收藏
+                         </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                       <i class="bi bi-heart"></i> 登入以收藏
+                    </a>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    {# 判斷是否為擁有者 #}
+                    {% if not is_owner %}
+                        {# 判斷商品是否可預約 (可選) #}
+                        {% if not product.is_sold %} {# and not product.is_reserved (如果只允許一人預約) #}
+                            {# 判斷使用者是否已預約 #}
+                            {% if user_has_reserved %}
+                                <a href="{% url 'cancel_reservation' product.id %}" class="btn btn-warning">
+                                    <i class="bi bi-calendar-x"></i> 取消預約
+                                </a>
+                            {% else %}
+                                <a href="{% url 'reserve_product' product.id %}" class="btn btn-success">
+                                   <i class="bi bi-calendar-check"></i> 預約購買
+                                </a>
+                            {% endif %}
+                        {% else %}
+                             <button class="btn btn-secondary" disabled>已售出</button>
+                        {% endif %}
+                    {% endif %} {# endif not is_owner #}
+                {% else %}
+                     <a href="{% url 'login' %}" class="btn btn-outline-success">
+                         <i class="bi bi-box-arrow-in-right"></i> 登入以預約
+                     </a>
+                {% endif %} {# endif user.is_authenticated #}
+
+            </div>{% if is_owner %}
+                <div class="mt-5 p-3 border rounded bg-light">
+                    <h4 class="mb-3">預約此商品的用戶</h4>
+                    {% if reservations %}
+                        <ul class="list-group">
+                            {% for reservation in reservations %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bi bi-person-fill"></i>
+                                    <a href="{% url 'seller_profile' reservation.user.id %}">{{ reservation.user.username }}</a>
+                                </span>
+                                <span class="badge bg-secondary rounded-pill">
+                                   {{ reservation.reserved_at|date:"Y/m/d H:i" }}
+                                </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">目前尚無用戶預約此商品。</p>
+                    {% endif %}
+                </div>
+            {% endif %} {# endif is_owner #}
+
         </div>
     </div>
 
-    <!-- 返回分類或首頁 -->
-    <div class="mt-4">
-        <a href="{% url 'category_products' product.category.id %}" class="btn btn-secondary">返回分類</a>
-        <a href="{% url 'index' %}" class="btn btn-secondary">回首頁</a>
+    <div class="mt-5">
+        {% if product.category %}
+        <a href="{% url 'category_products' product.category.id %}" class="btn btn-outline-secondary">返回 {{ product.category.name }} 分類</a>
+        {% endif %}
+        <a href="{% url 'index' %}" class="btn btn-outline-secondary">回首頁</a>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 {% endblock %}
