@@ -4,25 +4,27 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>二手拍賣平台</title>
+    <title>中大二手・再續錢緣</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light shadow">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">二手拍賣平台</a>
+          <a class="navbar-brand" href="{% url 'index' %}">
+            <img src="{% static 'images/logo.png' %}" alt="中大二手・再續錢圓 Logo" height="120">
+          </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
                 aria-label="切換導航">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-start align-items-center" id="navbarContent">
-              <ul class="navbar-nav mb-2 mb-lg-0">
+              <ul class="navbar-nav ms-3">
                   <li class="nav-item">
                       <a class="nav-link active" aria-current="page" href="{% url 'index' %}">首頁</a>
                   </li>
-                  <li class="nav-item dropdown">
+                  <li class="nav-item ms-3">
                       <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button"
                           data-bs-toggle="dropdown" aria-expanded="false">
                           商品分類
@@ -68,8 +70,9 @@
 
     <section class="hero">
         <div class="container">
-            <h1>歡迎來到二手拍賣平台</h1>
-            <p>輕鬆買賣，資源共享</p>
+            <h1>歡迎來到中大二手・再續錢緣</h1>
+            <br></br>
+            <p>你的閒置，他的寶藏，在復活福利社之外的另一個好地方！</p>
         </div>
     </section>
 
@@ -118,7 +121,7 @@
               
     <footer class="py-4">
         <div class="container text-center">
-            <p class="mb-0">© 2025 二手拍賣平台. All rights reserved.</p>
+            <p class="mb-0">© 2025 中大二手・再續錢緣. All rights reserved.</p>
         </div>
     </footer>
 
