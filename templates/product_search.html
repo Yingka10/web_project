@@ -13,24 +13,27 @@
     <p>共有 {{ results.count }} 筆相關商品</p>
     
     <div class="row">
-      {% for product in results %}
+      {% for post in results %}
         <div class="col-md-4 mb-4">
           <div class="card">
-            {% if product.image %}
-              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}">
+            {% if post.image %}
+              <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
             {% else %}
               <img src="{% static 'images/default.jpg' %}" class="card-img-top" alt="預設圖片">
             {% endif %}
             <div class="card-body">
-              <h5 class="card-title">{{ product.title }}</h5>
-              <p class="card-text">{{ product.body }}</p>
-              <p class="card-text text-primary">價格：${{ product.price }}</p>
-              <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-primary">查看詳情</a>
+              <h5 class="card-title">
+                <a href="{% url 'product_detail' post.id %}" class="text-decoration-none text-dark">
+                  {{ post.title }}
+                </a>
+              </h5>
+              <p class="card-text text-truncate">{{ post.body|truncatechars:100 }}</p>
+              <p class="card-text text-primary">價格：${{ post.price }}</p>
             </div>
           </div>
         </div>
       {% empty %}
-        <p>找不到相關商品。</p>
+        <p class="text-muted">找不到相關商品。</p>
       {% endfor %}
     </div>
     <a href="{% url 'index' %}" class="btn btn-secondary">回首頁</a>
