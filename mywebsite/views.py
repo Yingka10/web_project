@@ -142,7 +142,12 @@ def category_products(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     # 透過 models.ForeignKey 的 related_name 反查該分類下的所有商品
     products = category.posts.all()
-    return render(request, "category_products.html", {'category': category, 'products': products})
+    categories = Category.objects.all()  # 加這行
+    return render(request, 'category_products.html', {
+        'category': category,
+        'products': products,
+        'categories': categories,  # 傳給 base.html 的下拉選單用
+    })
 
 def register(request):
     if request.method == 'POST':
@@ -314,7 +319,6 @@ def cancel_reservation(request, id):
 
     return redirect('product_detail', id=id)
 
-# ... (seller_profile view 保持不變) ...
 def seller_profile(request, user_id):
     seller = get_object_or_404(User, id=user_id)
     seller_posts = seller.posts.all()
@@ -322,3 +326,25 @@ def seller_profile(request, user_id):
         'seller': seller,
         'seller_posts': seller_posts
     })
+
+@login_required
+def mark_as_sold(request, id):
+    # 使用 get_object_or_404 確保商品存在，同時只允許擁有者操作
+    product = get_object_or_404(Post, id=id, owner=request.user)
+
+    if request.method == 'POST': # 建議使用 POST 請求來更改狀態
+        # 將商品標示為已售出
+        product.is_sold = True
+        # (可選) 同時標示為未預約狀態，或清除所有預約
+        # product.is_reserved = False
+        # Reservation.objects.filter(product=product).delete() # 如果需要清除預約
+        product.save()
+        messages.success(request, f"商品 '{product.title}' 已成功標示為已售出。")
+        # 可以選擇重導回商品頁面或個人頁面
+        return redirect('product_detail', id=id)
+        # 或者 return redirect('profile')
+    else:
+        # 如果是 GET 請求，可以顯示確認頁面或直接重導（但不建議直接用GET修改數據）
+        # 這裡我們先簡單重導，並提示應使用 POST
+        messages.warning(request, "無效的操作請求。")
+        return redirect('product_detail', id=id)
