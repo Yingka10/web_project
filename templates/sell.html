@@ -21,6 +21,14 @@
         <label for="image">商品圖片:</label>
         <input type="file" id="image" name="image" required>
         <br>
+        <label for="category">商品分類:</label>
+        <select id="category" name="category" required>
+            <option value="">請選擇分類</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <br>
         <button type="submit">上架</button>
     </form>
 </body>

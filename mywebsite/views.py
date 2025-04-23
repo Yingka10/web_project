@@ -15,10 +15,6 @@ def homepage(request):
     categories = Category.objects.all()  # 獲取所有分類
     return render(request, "index.html", {'products': products, 'categories': categories})
 
-def get_db_result(request):
-    posts = Post.objects.all()
-    return render(request, "index_get_db_result.html", locals())
-
 @login_required
 def toggle_favorite(request, id):
     product = get_object_or_404(Post, id=id)
@@ -140,34 +136,34 @@ def login(request):
 def sell(request):
     if request.method == 'POST':
         # 處理表單提交
-        # 從 request.POST 獲取文字資料
         name = request.POST.get('name')
         description = request.POST.get('description')
         price = request.POST.get('price')
-        # 從 request.FILES 獲取檔案資料
         image = request.FILES.get('image')
+        category_id = request.POST.get('category')  # 獲取選擇的分類 ID
 
-        # 簡單的驗證 (確保必要欄位存在)
-        if name and description and price and image:
-            # 創建 Post 物件並儲存到資料庫
-            # 注意：表單中的 'name' 對應模型的 'title'
+        # 驗證資料
+        if name and description and price and image and category_id:
+            category = Category.objects.get(id=category_id)  # 獲取分類物件
             Post.objects.create(
                 title=name,
                 body=description,
                 price=price,
                 image=image,
+                category=category,  # 儲存分類
                 owner=request.user
             )
-            # 新增成功後，重定向到首頁，使用者就能看到新上架的商品
             return redirect('index')
         else:
-            # 如果資料不完整，可以選擇顯示錯誤訊息或重新渲染表單
-            # 這裡我們先簡單地重新渲染空表單
-            # 更完善的做法是使用 Django Forms 來處理驗證和錯誤顯示
-            return render(request, "sell.html", {'error': '請填寫所有欄位並上傳圖片'})
+            return render(request, "sell.html", {
+                'error': '請填寫所有欄位並上傳圖片',
+                'categories': Category.objects.all()  # 傳遞分類資料
+            })
 
-    # 如果是 GET 請求，像之前一樣顯示空表單
-    return render(request, "sell.html")
+    # 如果是 GET 請求，顯示空表單
+    return render(request, "sell.html", {
+        'categories': Category.objects.all()  # 傳遞分類資料
+    })
 
 def product_search(request):
     # 從 GET 請求中取得關鍵字，參數名稱 "q" 可以依需求修改
