@@ -124,8 +124,29 @@
                     </form>
                 {% endif %}
 
-            </div>{% if is_owner %}
-                {% endif %}
+            </div>
+            {% if is_owner %}
+                <div class="mt-5 p-3 border rounded bg-light">
+                    <h4 class="mb-3">預約此商品的用戶</h4>
+                    {% if reservations %}
+                        <ul class="list-group">
+                            {% for reservation in reservations %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bi bi-person-fill"></i>
+                                    <a href="{% url 'seller_profile' reservation.user.id %}">{{ reservation.user.username }}</a>
+                                </span>
+                                <span class="badge bg-secondary rounded-pill">
+                                {{ reservation.reserved_at|date:"Y/m/d H:i" }}
+                                </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">目前尚無用戶預約此商品。</p>
+                    {% endif %}
+                </div>
+            {% endif %} 
 
         </div>
     </div>
