@@ -1,3 +1,4 @@
+{% extends 'base.html' %}
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -68,6 +69,7 @@
         </div>
     </nav>
 
+    {% block content %}
     <section class="hero">
         <div class="container">
             <h1>歡迎來到中大二手・再續錢緣</h1>
@@ -118,6 +120,7 @@
     </div>
   </div>
 </section>
+{% endblock %}
               
     <footer class="py-4">
         <div class="container text-center">

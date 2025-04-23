@@ -14,6 +14,7 @@ import json
 import cloudinary
 from django.conf import settings
 from django.contrib.auth.models import User
+from .models import Post
 
 
 
@@ -31,11 +32,19 @@ def homepage(request):
 @login_required
 def toggle_favorite(request, id):
     product = get_object_or_404(Post, id=id)
+    # 🐛 Debug 印出目前登入者跟商品賣家
+    # print("賣家:", product.owner)
+    # print("登入者:", request.user)
+    if product.owner == request.user:
+        messages.error(request, "你不能收藏自己的商品！")
+        return redirect(request.META.get('HTTP_REFERER', 'index'))
     # 如果目前使用者已收藏此商品，就移除；否則加入收藏
     if request.user in product.favorites.all():
         product.favorites.remove(request.user)
+        messages.success(request, "✅ 已從收藏移除。")
     else:
         product.favorites.add(request.user)
+        messages.success(request, "✅ 已加入收藏！")
     # 重導回前一個頁面
     return redirect(request.META.get('HTTP_REFERER', 'index'))
 
@@ -227,6 +236,28 @@ def seller_profile(request, user_id):
         'seller': seller,
         'seller_posts': seller_posts
     })
+
+# def add_to_favorites(request, post_id):
+#     post = get_object_or_404(Post, id=post_id)
+
+#     # 檢查使用者是否是商品作者（賣家）
+#     if post.owner == request.user:  # ← 這裡要確定你的 Post 有 owner 欄位
+#         messages.error(request, "你不能收藏自己的商品！")
+#         return redirect('post_detail', post_id=post.id)
+
+def add_to_favorites(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    print("登入者：", request.user)
+    print("賣家是：", post.owner)
+
+    if post.owner == request.user:
+        messages.error(request, "你不能收藏自己的商品！")
+        return redirect('post_detail', post_id=post.id)
+
+    post.favorites.add(request.user)
+    messages.success(request, "收藏成功")
+    return redirect('post_detail', post_id=post.id)
 # +++ 新增 reserve_product View +++
 @login_required
 def reserve_product(request, id):
