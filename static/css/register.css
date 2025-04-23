@@ -1,5 +1,13 @@
 body {
-    background-color: #f8f9fa; /* Bootstrap 的淺灰色背景 */
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .register-container {
@@ -7,51 +15,106 @@ body {
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 100%; /* 預設寬度為 100% */
-    max-width: 400px; /* 在較大螢幕上限制最大寬度 */
-}
-
-h1 {
-    color: #343a40; /* Bootstrap 的深灰色文字 */
-    margin-bottom: 20px;
+    width: 100%;
+    max-width: 450px; 
     text-align: center;
 }
 
-.form-label {
+h1 {
+    color: #333; 
+    margin-bottom: 25px; 
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555; 
     font-weight: bold;
-    color: #495057; /* Bootstrap 的灰色文字 */
+    text-align: left; 
 }
 
-.form-control {
-    margin-bottom: 20px;
-    border: 1px solid #ced4da; /* Bootstrap 的邊框顏色 */
-    border-radius: 0.25rem;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    box-sizing: border-box;
+input[type="text"],
+input[type="email"], 
+input[type="password"] {
     width: 100%;
+    padding: 10px;
+    margin-bottom: 15px; 
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #007bff; /* Bootstrap 的主要藍色 */
-    border-color: #007bff;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    border-radius: 0.25rem;
+input.is-invalid {
+  border-color: #dc3545; 
+  padding-right: calc(1.5em + 0.75rem);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.invalid-feedback {
+    display: none; 
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em; 
+    color: #dc3545; 
+    text-align: left; 
+}
+
+input.is-invalid + .invalid-feedback {
+    display: block;
+}
+
+
+.form-text {
+    font-size: 0.875em;
+    color: #6c757d; 
+    text-align: left;
+    margin-top: -10px; 
+    margin-bottom: 10px;
+}
+
+
+button[type="submit"] {
+    background-color: #007bff; 
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    width: 100%; /* 按鈕寬度佔滿容器 */
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px; 
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+button[type="submit"]:hover {
+    background-color: #0056b3; 
 }
 
-.error-message {
-    color: #dc3545; /* Bootstrap 的紅色 */
-    margin-top: 10px;
-    font-size: 0.875rem;
+.alert.alert-danger {
+    color: #721c24; 
+    background-color: #f8d7da; 
+    border-color: #f5c6cb; 
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    text-align: left;
+}
+
+p.mt-3.text-center {
+    margin-top: 1.5rem !important;
+    color: #555;
+}
+
+p.mt-3.text-center a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+p.mt-3.text-center a:hover {
+    text-decoration: underline;
 }
