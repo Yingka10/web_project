@@ -40,7 +40,9 @@ body {
 }
 
 .hero p {
-  font-size: 1.5rem;
+  font-size: 2rem;
+  font-family:"微軟正黑體", "Microsoft JhengHei", sans-serif;
+  text-shadow: 2px 2px 4px #000;
 }
 
 /* 商品卡片 */
