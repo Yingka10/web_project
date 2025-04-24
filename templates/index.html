@@ -80,9 +80,22 @@
 
     <section class="py-5">
       <div class="container">
-        <div class="mb-4">
-          <h2>最新上架</h2>
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+          <h2 class="mb-0">最新上架</h2>
+          <form method="get" class="d-flex align-items-center">
+            <label for="sort" class="me-2">排序：</label>
+            <select name="sort" id="sort" class="form-select" onchange="this.form.submit()" style="width: 180px;">
+              <option value="">預設排序</option>
+              <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>價格：低到高</option>
+              <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>價格：高到低</option>
+              <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>上架時間：新到舊</option>
+              <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>上架時間：舊到新</option>
+            </select>
+          </form>
         </div>
+        <!-- <div class="mb-4">
+          <h2>最新上架</h2>
+        </div> -->
         <div class="row g-4">
           {% for product in products %}
           <div class="col-md-4">

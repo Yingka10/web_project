@@ -25,9 +25,28 @@ cloudinary.config(
 )
 
 def homepage(request):
-    products = Post.objects.all()  # 獲取所有商品
-    categories = Category.objects.all()  # 獲取所有分類
-    return render(request, "index.html", {'products': products, 'categories': categories})
+    sort = request.GET.get('sort')  # 取得排序參數
+    products = Post.objects.all()
+
+    if sort == 'price_asc':
+        products = products.order_by('price')
+    elif sort == 'price_desc':
+        products = products.order_by('-price')
+    elif sort == 'date_desc':
+        products = products.order_by('-pub_date')  # 由新到舊
+    elif sort == 'date_asc':
+        products = products.order_by('pub_date')   # 由舊到新
+
+    categories = Category.objects.all()
+    return render(request, "index.html", {
+        'products': products,
+        'categories': categories,
+        'sort': sort,  # 把目前的排序傳給模板，方便下拉選單顯示狀態
+    })
+# def homepage(request):
+#     products = Post.objects.all()  # 獲取所有商品
+#     categories = Category.objects.all()  # 獲取所有分類
+#     return render(request, "index.html", {'products': products, 'categories': categories})
 
 @login_required
 def toggle_favorite(request, id):
