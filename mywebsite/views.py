@@ -45,13 +45,18 @@ def toggle_favorite(request, id):
 @login_required
 def profile(request):
     favorites = request.user.favorite_posts.prefetch_related('images').all()
+    user_reservations = Reservation.objects.filter(user=request.user)\
+                                        .select_related('product')\
+                                        .prefetch_related('product__images')\
+                                        .order_by('-reserved_at')
     all_my_posts = request.user.posts.prefetch_related('images').all() # 先獲取所有商品
     active_posts = all_my_posts.filter(is_sold=False) # 篩選出未售出的
     sold_posts = all_my_posts.filter(is_sold=True)   # 篩選出已售出的
     return render(request, "profile.html", {
         'favorites': favorites,
+        'user_reservations': user_reservations,
         'active_posts': active_posts,
-        'sold_posts': sold_posts     
+        'sold_posts': sold_posts 
     })
 
 @csrf_exempt
