@@ -37,55 +37,91 @@
     </div>
   </section>
 
-  <section>
-    <h2 class="mb-4">我上架的商品</h2>
+  {# 1. 我上架的商品 (未售出) #}
+  <section class="mb-5">
+    <h2 class="mb-4">我刊登中的商品</h2>
     <div class="row g-4">
-      {% for product in my_posts %}
+      {% for product in active_posts %}
         <div class="col-md-4">
-          {# 加入 position-relative #}
           <div class="card h-100 shadow-sm position-relative">
-             {# +++ 已售出徽章 +++ #}
-             {% if product.is_sold %}
-                <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
-                <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25"style="z-index: 0; pointer-events: none;"></div>
-             {% endif %}
+      
 
-             {% with first_image=product.images.first %} {# 嘗試取得第一個 ProductImage 物件 #}
-              {% if first_image and first_image.image and first_image.image.url %} {# 確保物件存在、圖片欄位存在、URL也存在 #}
-               <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
-              {% else %} {# 如果找不到圖片或 URL，顯示 logo #}
-               <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
-              {% endif %}
-             {% endwith %}
+            {# 顯示圖片 #}
+            {% with img_to_display=product.get_first_image %}
+                {% if img_to_display and img_to_display.url %}
+                    <img src="{{ img_to_display.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
+                {% else %}
+                    <img src="{% static 'images/logo.png' %}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="預設圖片">
+                {% endif %}
+            {% endwith %}
+
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">{{ product.title }}</h5>
-              <p class="card-text text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
+              <p class="card-text text-primary fw-bold">價格: ${{ product.price }}</p> {# 正常顯示價格 #}
               {% with product.reservations.count as reservation_count %}
-                {% if reservation_count > 0 and not product.is_sold %} {# 僅在未售出時顯示預約人數 #}
+                {% if reservation_count > 0 %}
                   <p class="card-text text-info small">
                       <i class="bi bi-calendar-check-fill"></i> {{ reservation_count }} 人預約
                   </p>
                 {% endif %}
               {% endwith %}
               <div class="mt-auto">
-                 <a href="{% url 'product_detail' product.id %}" class="btn btn-sm {% if product.is_sold %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
-                     {% if product.is_sold %}查看狀態{% else %}查看詳情 & 預約者{% endif %}
+                 <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-secondary">
+                     查看詳情 & 預約者
                  </a>
-                 {# 可以在這裡也加上標示售出的按鈕，但通常在詳情頁操作比較好 #}
-                 {% if not product.is_sold %}
+                 {# 顯示標示售出的按鈕 #}
                  <form action="{% url 'mark_as_sold' product.id %}" method="post" class="d-inline ms-2">
                      {% csrf_token %}
-                     <button type="submit" class="btn btn-sm btn-outline-danger" title="標示為已售出">
-                         <i class="bi bi-cart-x"></i>
+                     <button type="submit" class="btn btn-sm btn-outline-danger" title="標示為已售出" onclick="return confirm('確定要將此商品標示為已售出嗎？');">
+                         <i class="bi bi-cart-x"></i> 售出
                      </button>
                  </form>
-                 {% endif %}
-                 </div>
+               </div>
             </div>
           </div>
         </div>
       {% empty %}
-        <p class="text-muted">您還沒有上架任何商品。 <a href="{% url 'sell' %}">前往上架</a></p>
+        <p class="text-muted">您目前沒有刊登中的商品。 <a href="{% url 'sell' %}">前往上架</a></p>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# 2. 我已售出的商品 #}
+  <section>
+    <h2 class="mb-4">我已售出的商品</h2>
+    <div class="row g-4">
+      {% for product in sold_posts %}
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm position-relative">
+             {# 顯示已售出徽章 #}
+             <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
+             <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 0; pointer-events: none;"></div>
+
+             {# 顯示圖片 (變暗) #}
+            {% with img_to_display=product.get_first_image %}
+                {% if img_to_display and img_to_display.url %}
+                    <img src="{{ img_to_display.url }}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
+                {% else %}
+                    <img src="{% static 'images/logo.png' %}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="預設圖片">
+                {% endif %}
+            {% endwith %}
+
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ product.title }}</h5>
+              {# 價格變灰且劃掉 #}
+              <p class="card-text text-muted text-decoration-line-through fw-bold">價格: ${{ product.price }}</p>
+              {# 可以選擇不顯示預約人數 #}
+              <div class="mt-auto">
+                 <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-secondary"> {# 按鈕變灰色 #}
+                     查看狀態
+                 </a>
+                 {# 不再顯示標示售出的按鈕 #}
+               </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted">您還沒有已售出的商品記錄。</p>
       {% endfor %}
     </div>
   </section>

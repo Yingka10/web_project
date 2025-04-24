@@ -45,10 +45,13 @@ def toggle_favorite(request, id):
 @login_required
 def profile(request):
     favorites = request.user.favorite_posts.prefetch_related('images').all()
-    my_posts = request.user.posts.prefetch_related('images').all()
+    all_my_posts = request.user.posts.prefetch_related('images').all() # 先獲取所有商品
+    active_posts = all_my_posts.filter(is_sold=False) # 篩選出未售出的
+    sold_posts = all_my_posts.filter(is_sold=True)   # 篩選出已售出的
     return render(request, "profile.html", {
         'favorites': favorites,
-        'my_posts': my_posts,
+        'active_posts': active_posts,
+        'sold_posts': sold_posts     
     })
 
 @csrf_exempt
@@ -309,13 +312,7 @@ def cancel_reservation(request, id):
 
     return redirect('product_detail', id=id)
 
-def seller_profile(request, user_id):
-    seller = get_object_or_404(User, id=user_id)
-    seller_posts = seller.posts.all()
-    return render(request, "seller_profile.html", {
-        'seller': seller,
-        'seller_posts': seller_posts
-    })
+
 
 @login_required
 def mark_as_sold(request, id):
