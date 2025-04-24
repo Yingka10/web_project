@@ -10,43 +10,56 @@
   <div class="row g-4">
     {% for product in results %}
     <div class="col-md-4">
-      <div class="card product-card shadow-sm h-100 position-relative">
-        {% if product.is_sold %}
-          <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
-          <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 0;"></div>
-        {% endif %}
+      <!-- 添加卡片懸浮效果：加入 transition 和 hover 效果 -->
+      <div class="card product-card shadow-sm h-100 position-relative mb-4" 
+          style="transition: transform 0.3s ease, box-shadow 0.3s ease;"
+          onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)';" 
+          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
+        
+        {# 賣家信息 - 在圖片上方 #}
+        <div class="card-header bg-light p-2">
+          <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
+            <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
+          </a>
+        </div>
 
-        {% if product.image %}
-          <img src="{{ product.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
-        {% else %}
-          <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
-        {% endif %}
-
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ product.title }}</h5>
-          <p class="card-text {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">{{ product.body|truncatewords:15 }}</p>
-          <div class="mt-auto d-flex justify-content-between align-items-center">
-            <span class="text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">${{ product.price }}</span>
-            <div>
-              <a href="{% url 'product_detail' product.id %}" class="btn btn-sm {% if product.is_sold %}btn-secondary{% else %}btn-outline-primary{% endif %}">
-                {% if product.is_sold %}已售出{% else %}查看詳情{% endif %}
-              </a>
-              {% if not product.is_sold %}
-                {% if user.is_authenticated %}
-                <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-sm btn-outline-warning ms-2">
+        {# 將整個卡片變成可點擊區域 #}
+        <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark" style="position: relative; z-index: 1;">
+          <div class="position-relative">
+            {# 已售出徽章 - 移到圖片內部左上角 #}
+            {% if product.is_sold %}
+              <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 2; transform: rotate(-15deg);">已售出</span>
+              <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 1;"></div>
+            {% endif %}
+            
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
+            {% endif %}
+          </div>
+          
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ product.title }}</h5>
+            <p class="card-text {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">{{ product.body|truncatewords:15 }}</p>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <span class="text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">${{ product.price }}</span>
+              
+              {# 收藏愛心按鈕 - 放在卡片右下角 #}
+              {% if user.is_authenticated and user != product.owner and not product.is_sold %}
+              <div style="z-index: 10; position: relative;">
+                <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation();">
                   {% if user in product.favorites.all %}
-                    移除收藏
+                  <i class="bi bi-heart-fill text-danger fs-5"></i>
                   {% else %}
-                    加入收藏
+                  <i class="bi bi-heart text-danger fs-5"></i>
                   {% endif %}
                 </a>
-                {% else %}
-                <a href="{% url 'login' %}" class="btn btn-sm btn-outline-warning ms-2">加入收藏</a>
-                {% endif %}
+              </div>
               {% endif %}
             </div>
           </div>
-        </div>
+        </a>
       </div>
     </div>
     {% empty %}
