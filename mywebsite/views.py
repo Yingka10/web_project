@@ -3,7 +3,7 @@ from django.utils import timezone # 引入 timezone
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
-from mywebsite.models import Post, Category, Reservation
+from mywebsite.models import Post, Category, Reservation , ProductImage
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -25,19 +25,13 @@ cloudinary.config(
 )
 
 def homepage(request):
-    products = Post.objects.all()  # 獲取所有商品
-    categories = Category.objects.all()  # 獲取所有分類
+    products = Post.objects.filter(is_sold=False).prefetch_related('images').all()
+    categories = Category.objects.all()
     return render(request, "index.html", {'products': products, 'categories': categories})
 
 @login_required
 def toggle_favorite(request, id):
     product = get_object_or_404(Post, id=id)
-    # 🐛 Debug 印出目前登入者跟商品賣家
-    # print("賣家:", product.owner)
-    # print("登入者:", request.user)
-    if product.owner == request.user:
-        messages.error(request, "你不能收藏自己的商品！")
-        return redirect(request.META.get('HTTP_REFERER', 'index'))
     # 如果目前使用者已收藏此商品，就移除；否則加入收藏
     if request.user in product.favorites.all():
         product.favorites.remove(request.user)
@@ -50,8 +44,8 @@ def toggle_favorite(request, id):
 
 @login_required
 def profile(request):
-    favorites = request.user.favorite_posts.all()
-    my_posts = request.user.posts.all()
+    favorites = request.user.favorite_posts.prefetch_related('images').all()
+    my_posts = request.user.posts.prefetch_related('images').all()
     return render(request, "profile.html", {
         'favorites': favorites,
         'my_posts': my_posts,
@@ -113,7 +107,7 @@ def api(request):
         return JsonResponse({'error': 'Only GET and POST methods are supported'}, status=405)
     
 def product_detail(request, id):
-    product = get_object_or_404(Post, id=id)
+    product = get_object_or_404(Post.objects.prefetch_related('images'), id=id)
     reservations = None # 初始化為 None
     is_owner = False # 標記當前使用者是否為擁有者
 
@@ -141,7 +135,7 @@ def product_detail(request, id):
 def category_products(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     # 透過 models.ForeignKey 的 related_name 反查該分類下的所有商品
-    products = category.posts.all()
+    products = category.posts.prefetch_related('images').all()
     categories = Category.objects.all()  # 加這行
     return render(request, 'category_products.html', {
         'category': category,
@@ -190,20 +184,45 @@ def sell(request):
         price = request.POST.get('price')
         image = request.FILES.get('image')
         category_id = request.POST.get('category')  # 獲取選擇的分類 ID
+        images = request.FILES.getlist('images')
+        
+        # 基本驗證
+        if name and description and price and category_id and images: # 確保至少有一張圖片
+            try:
+                category = Category.objects.get(id=category_id)
+                # 先建立 Post 物件
+                new_post = Post.objects.create(
+                    title=name,
+                    body=description,
+                    price=price,
+                    category=category,
+                    owner=request.user
+                )
+                is_first_image = True # 標記第一張圖片
+                for img in images:
+                    ProductImage.objects.create(
+                        post=new_post,
+                        image=img,
+                        # 可以設定第一張為主圖
+                        is_primary=is_first_image
+                    )
+                    is_first_image = False 
 
-        # 驗證資料
-        if name and description and price and image and category_id:
-            category = Category.objects.get(id=category_id)  # 獲取分類物件
-            Post.objects.create(
-                title=name,
-                body=description,
-                price=price,
-                image=image,
-                category=category,  # 儲存分類
-                owner=request.user
-            )
-            return redirect('index')
+                messages.success(request, "商品已成功上架！")
+                return redirect('index')
+            except Category.DoesNotExist:
+                 messages.error(request, "選擇的分類無效。")
+            except Exception as e:
+                 messages.error(request, f"上架時發生錯誤：{e}")
+             
+
         else:
+            # 提供更明確的錯誤訊息
+            error_message = "請填寫所有欄位並上傳至少一張圖片。"
+            if not images:
+                error_message = "請至少上傳一張商品圖片。"
+            messages.error(request, error_message)
+
             return render(request, "sell.html", {
                 'error': '請填寫所有欄位並上傳圖片',
                 'categories': Category.objects.all()  # 傳遞分類資料
@@ -221,7 +240,7 @@ def product_search(request):
     # 如果有輸入關鍵字，則進行搜尋
     if query:
         # 使用 Q 可在多個欄位中進行搜尋，例如商品標題和內文
-        results = Post.objects.filter(
+        results = Post.objects.prefetch_related('images').filter(
             Q(title__icontains=query) | Q(body__icontains=query)
         )
     else:
@@ -242,23 +261,12 @@ def seller_profile(request, user_id):
         'seller_posts': seller_posts
     })
 
-# def add_to_favorites(request, post_id):
-#     post = get_object_or_404(Post, id=post_id)
-
-#     # 檢查使用者是否是商品作者（賣家）
-#     if post.owner == request.user:  # ← 這裡要確定你的 Post 有 owner 欄位
-#         messages.error(request, "你不能收藏自己的商品！")
-#         return redirect('post_detail', post_id=post.id)
 
 def add_to_favorites(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
     print("登入者：", request.user)
     print("賣家是：", post.owner)
-
-    if post.owner == request.user:
-        messages.error(request, "你不能收藏自己的商品！")
-        return redirect('post_detail', post_id=post.id)
 
     post.favorites.add(request.user)
     messages.success(request, "收藏成功")
@@ -268,18 +276,6 @@ def add_to_favorites(request, post_id):
 def reserve_product(request, id):
     product = get_object_or_404(Post, id=id)
     user = request.user
-
-    # 檢查是否是商品擁有者，擁有者不能預約自己的商品
-    if product.owner == user:
-        messages.error(request, "您不能預約自己的商品。")
-        return redirect('product_detail', id=id)
-
-    # 檢查商品是否已售出或已被預約 (如果需要限制只能一人預約)
-    # if product.is_sold or product.is_reserved:
-    #     messages.warning(request, "此商品已被預約或已售出。")
-    #     return redirect('product_detail', id=id)
-
-    # 嘗試創建預約，利用 unique_together 防止重複預約
     try:
         reservation, created = Reservation.objects.get_or_create(
             product=product,
@@ -287,9 +283,6 @@ def reserve_product(request, id):
             defaults={'reserved_at': timezone.now()} # 使用 timezone.now()
         )
         if created:
-            # (可選) 更新商品狀態
-            # product.is_reserved = True
-            # product.save()
             messages.success(request, f"成功預約商品：{product.title}")
         else:
             messages.info(request, "您已經預約過此商品。")
@@ -307,10 +300,7 @@ def cancel_reservation(request, id):
     try:
         reservation = Reservation.objects.get(product=product, user=user)
         reservation.delete()
-        # (可選) 更新商品狀態，如果需要允許多人預約，這裡邏輯要調整
-        # maybe check if other reservations exist before setting is_reserved to False
-        # product.is_reserved = Reservation.objects.filter(product=product).exists()
-        # product.save()
+      
         messages.success(request, f"已取消預約商品：{product.title}")
     except Reservation.DoesNotExist:
         messages.warning(request, "您並未預約此商品。")
@@ -332,19 +322,13 @@ def mark_as_sold(request, id):
     # 使用 get_object_or_404 確保商品存在，同時只允許擁有者操作
     product = get_object_or_404(Post, id=id, owner=request.user)
 
-    if request.method == 'POST': # 建議使用 POST 請求來更改狀態
+    if request.method == 'POST': 
         # 將商品標示為已售出
         product.is_sold = True
-        # (可選) 同時標示為未預約狀態，或清除所有預約
-        # product.is_reserved = False
-        # Reservation.objects.filter(product=product).delete() # 如果需要清除預約
         product.save()
         messages.success(request, f"商品 '{product.title}' 已成功標示為已售出。")
-        # 可以選擇重導回商品頁面或個人頁面
-        return redirect('product_detail', id=id)
-        # 或者 return redirect('profile')
+        return redirect('profile')
+     
     else:
-        # 如果是 GET 請求，可以顯示確認頁面或直接重導（但不建議直接用GET修改數據）
-        # 這裡我們先簡單重導，並提示應使用 POST
         messages.warning(request, "無效的操作請求。")
-        return redirect('product_detail', id=id)
+        return redirect('profile')

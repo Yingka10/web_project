@@ -13,11 +13,14 @@
       {% for product in favorites %}
         <div class="col-md-4">
           <div class="card h-100 shadow-sm">
-            {% if product.image %}
-              <img src="{{ product.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
-            {% else %}
-              <img src="{% static 'images/default.jpg' %}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="預設圖片">
-            {% endif %}
+            {% with first_image=product.images.first %} {# 嘗試取得第一個 ProductImage 物件 #}
+              {% if first_image and first_image.image and first_image.image.url %} {# 確保物件存在、圖片欄位存在、URL也存在 #}
+                <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+              {% else %} {# 如果找不到圖片或 URL，顯示 logo #}
+                <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
+              {% endif %}
+            {% endwith %}
+
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">{{ product.title }}</h5>
               <p class="card-text text-primary fw-bold">價格: ${{ product.price }}</p>
@@ -47,11 +50,13 @@
                 <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25"style="z-index: 0; pointer-events: none;"></div>
              {% endif %}
 
-            {% if product.image %}
-              <img src="{{ product.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
-            {% else %}
-              <img src="{% static 'images/default.jpg' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" style="height: 200px; object-fit: cover;" alt="預設圖片">
-            {% endif %}
+             {% with first_image=product.images.first %} {# 嘗試取得第一個 ProductImage 物件 #}
+              {% if first_image and first_image.image and first_image.image.url %} {# 確保物件存在、圖片欄位存在、URL也存在 #}
+               <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+              {% else %} {# 如果找不到圖片或 URL，顯示 logo #}
+               <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
+              {% endif %}
+             {% endwith %}
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">{{ product.title }}</h5>
               <p class="card-text text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>

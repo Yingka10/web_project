@@ -18,7 +18,6 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)  # 新增價格欄位
-    image = CloudinaryField('image', blank=True, null=True)  # 使用 CloudinaryField
     pub_date = models.DateTimeField(auto_now_add=True)
     # 新增與 Category 的關聯，若你希望此欄位為必填就省略 null 與 blank 參數
     category = models.ForeignKey(
@@ -55,6 +54,25 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_first_image(self):
+        first_image = self.images.first()
+        return first_image.image if first_image else None
+    
+class ProductImage(models.Model):
+    post = models.ForeignKey(Post, related_name='images', on_delete=models.CASCADE, verbose_name="商品")
+    image = CloudinaryField(verbose_name="圖片")
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="上傳時間")
+    is_primary = models.BooleanField(default=False, verbose_name="主要圖片") # 可選：標記主要圖片
+
+    class Meta:
+        verbose_name = "商品圖片"
+        verbose_name_plural = "商品圖片"
+        ordering = ['-is_primary', 'uploaded_at'] # 主要圖片優先，其次按上傳時間
+
+    def __str__(self):
+        return f"{self.post.title} 的圖片"
+        
 # +++ 新增 Reservation 模型 +++
 class Reservation(models.Model):
     product = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reservations', verbose_name="預約商品")

@@ -38,14 +38,44 @@
     <div class="row">
         <div class="col-md-6 position-relative"> {# 加入 position-relative #}
             {% if product.is_sold %}
-                <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1;">已售出</span>
+                <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 2;">已售出</span> {# z-index 提高，確保在輪播之上 #}
             {% endif %}
-            {% if product.image %}
-                <img src="{{ product.image.url }}" class="img-fluid rounded mb-3 {% if product.is_sold %}opacity-50{% endif %}" alt="{{ product.title }}">
+
+            {% with product_images=product.images.all %} {# 先取得所有圖片 #}
+            {% if product_images %}
+            <div id="productImageCarousel" class="carousel slide mb-3 {% if product.is_sold %}opacity-75{% endif %}" data-bs-ride="carousel">
+                {# 輪播指示器 (小圓點) #}
+                <div class="carousel-indicators">
+                    {% for image in product_images %}
+                    <button type="button" data-bs-target="#productImageCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+                    {% endfor %}
+                </div>
+                {# 輪播項目 #}
+                <div class="carousel-inner rounded">
+                    {% for image in product_images %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        {# 圖片建議設定固定高度，避免輪播時頁面跳動 #}
+                        <img src="{{ image.image.url }}" class="d-block w-100" style="height: 450px; object-fit: contain; background-color: #f8f9fa;" alt="{{ product.title }} - 圖片 {{ forloop.counter }}"> {# 使用 contain 或 cover #}
+                    </div>
+                    {% endfor %}
+                </div>
+                {# 上/下一頁控制按鈕 (只有多於一張圖片時顯示) #}
+                {% if product_images.count > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#productImageCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.3); border-radius: 50%;"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productImageCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.3); border-radius: 50%;"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                {% endif %}
+            </div>
             {% else %}
-                <img src="{% static 'images/default.jpg' %}" class="img-fluid rounded mb-3 {% if product.is_sold %}opacity-50{% endif %}" alt="預設圖片">
+                <img src="{% static 'images/logo.png' %}" class="img-fluid rounded mb-3 {% if product.is_sold %}opacity-50{% endif %}" alt="預設圖片">
             {% endif %}
-        </div>
+            {% endwith %}
+            </div>
         <div class="col-md-6">
             <h1 class="mb-3">{{ product.title }}</h1>
             {% if product.category %}
@@ -55,7 +85,7 @@
                 </a>
             </p>
             {% endif %}
-            <p class="text-primary fs-4">價格: ${{ product.price }}</p>
+            <p class="text-primary fs-4 {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
             <p>{{ product.body }}</p>
             {% if product.owner %}
             <p class="text-muted">
@@ -71,17 +101,20 @@
             <div class="d-flex flex-wrap gap-2 mt-4">
                 {% if not product.is_sold %}
                     {% if user.is_authenticated %}
-                        {% if user in product.favorites.all %}
-                            <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-danger">
-                               <i class="bi bi-heart-fill"></i> 取消收藏
-                            </a>
-                        {% else %}
-                             <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-primary">
-                                <i class="bi bi-heart"></i> 加入收藏
-                             </a>
+                        {# 檢查是否為擁有者，擁有者不能收藏自己的商品 #}
+                        {% if user != product.owner %}
+                            {% if user in product.favorites.all %}
+                                <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-danger">
+                                   <i class="bi bi-heart-fill"></i> 取消收藏
+                                </a>
+                            {% else %}
+                                 <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-heart"></i> 加入收藏
+                                 </a>
+                            {% endif %}
                         {% endif %}
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-primary">
                            <i class="bi bi-heart"></i> 登入以收藏
                         </a>
                     {% endif %}
@@ -108,7 +141,7 @@
                     {% endif %} {# endif not is_owner #}
                 {% else %}
                     {% if not product.is_sold %} {# 未登入且未售出才顯示登入預約 #}
-                        <a href="{% url 'login' %}" class="btn btn-outline-success">
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-success">
                             <i class="bi bi-box-arrow-in-right"></i> 登入以預約
                         </a>
                     {% endif %}
@@ -118,7 +151,7 @@
                     {# 使用表單以 POST 方式提交 #}
                     <form action="{% url 'mark_as_sold' product.id %}" method="post" class="d-inline">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('確定要將此商品標示為已售出嗎？');"> {# 加入確認提示 #}
                             <i class="bi bi-cart-x-fill"></i> 標示為已售出
                         </button>
                     </form>
@@ -146,7 +179,7 @@
                         <p class="text-muted">目前尚無用戶預約此商品。</p>
                     {% endif %}
                 </div>
-            {% endif %} 
+            {% endif %}
 
         </div>
     </div>
