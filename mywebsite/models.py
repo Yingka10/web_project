@@ -87,3 +87,4 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f"{self.user.username} 預約了 {self.product.title}"
+
