@@ -281,9 +281,42 @@ def product_search(request):
 def seller_profile(request, user_id):
     seller = get_object_or_404(User, id=user_id)
     seller_posts = seller.posts.all()
+
+    sort = request.GET.get('sort') 
+
+    # 分開刊登中和已售出的商品
+    active_posts = seller_posts.filter(is_sold=False)
+    sold_posts = seller_posts.filter(is_sold=True)
+
+    # 排序刊登中的商品
+    if sort == 'price_asc':
+        active_posts = active_posts.order_by('price')
+    elif sort == 'price_desc':
+        active_posts = active_posts.order_by('-price')
+    elif sort == 'date_desc':
+        active_posts = active_posts.order_by('-pub_date')
+    elif sort == 'date_asc':
+        active_posts = active_posts.order_by('pub_date')
+    else:
+        active_posts = active_posts.order_by('-pub_date')  # 預設排序
+
+    # 排序已售出的商品
+    if sort == 'price_asc':
+        sold_posts = sold_posts.order_by('price')
+    elif sort == 'price_desc':
+        sold_posts = sold_posts.order_by('-price')
+    elif sort == 'date_desc':
+        sold_posts = sold_posts.order_by('-pub_date')
+    elif sort == 'date_asc':
+        sold_posts = sold_posts.order_by('pub_date')
+    else:
+        sold_posts = sold_posts.order_by('-pub_date')  # 預設排序
+
     return render(request, "seller_profile.html", {
         'seller': seller,
-        'seller_posts': seller_posts
+        'active_posts': active_posts,
+        'sold_posts': sold_posts,
+        'sort': sort,
     })
 
 

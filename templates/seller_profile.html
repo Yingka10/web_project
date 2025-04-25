@@ -1,24 +1,96 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{{ seller.username }}的賣場 - 中大二手{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>{{ seller.username }} 的商品</h2>
-    <div class="row">
-        {% for post in seller_posts %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ post.title }}</h5>
-                        <p class="card-text">${{ post.price }}</p>
-                        <a href="{% url 'product_detail' post.id %}" class="btn btn-primary">查看詳情</a>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <p>這位賣家目前沒有商品上架。</p>
-        {% endfor %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ seller.username }} 的賣場</h2>
+        <form method="get" class="d-flex align-items-center">
+            <label for="sort" class="me-2">排序：</label>
+            <select name="sort" id="sort" class="form-select" onchange="this.form.submit()" style="width: 180px;">
+                <option value="">預設排序</option>
+                <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>價格：低到高</option>
+                <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>價格：高到低</option>
+                <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>上架時間：新到舊</option>
+                <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>上架時間：舊到新</option>
+            </select>
+        </form>
     </div>
+    <div class="row g-4">
+        <h3>刊登中的商品</h3>
+<div class="row g-4 mb-5">
+    {% for product in active_posts %}
+        <div class="col-md-4">
+            <div class="card product-card shadow-sm h-100 position-relative mb-4"
+                 style="transition: transform 0.3s ease, box-shadow 0.3s ease;"
+                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';"
+            >
+                <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark" style="position: relative; z-index: 1;">
+                    {% with first_image=product.images.first %} {# 嘗試取得第一個 ProductImage 物件 #}
+                        {% if first_image and first_image.image and first_image.image.url %} {# 確保物件存在、圖片欄位存在、URL也存在 #}
+                            <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %} {# 如果找不到圖片或 URL，顯示 logo #}
+                            <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ product.title }}</h5>
+                        <p class="card-text">{{ product.body|truncatewords:15 }}</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold">${{ product.price }}</span>
+
+                            {# 收藏愛心按鈕 #}
+                            {% if user.is_authenticated and user != product.owner and not product.is_sold %}
+                                <div style="z-index: 10; position: relative;">
+                                    <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation();">
+                                        {% if user in product.favorites.all %}
+                                            <i class="bi bi-heart-fill text-danger fs-5"></i>
+                                        {% else %}
+                                            <i class="bi bi-heart text-danger fs-5"></i>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <p>這位賣家目前沒有刊登中的商品。</p>
+    {% endfor %}
+</div>
+
+<h3>已售出的商品</h3>
+<div class="row g-4">
+    {% for product in sold_posts %}
+        <div class="col-md-4">
+            <div class="card product-card shadow-sm h-100 position-relative mb-4 opacity-75">
+                <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 2; transform: rotate(-15deg);">已售出</span>
+                <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark" style="position: relative; z-index: 1;">
+                    {% with first_image=product.images.first %} {# 嘗試取得第一個 ProductImage 物件 #}
+                        {% if first_image and first_image.image and first_image.image.url %} {# 確保物件存在、圖片欄位存在、URL也存在 #}
+                            <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %} {# 如果找不到圖片或 URL，顯示 logo #}
+                            <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ product.title }}</h5>
+                        <p class="card-text text-muted text-decoration-line-through">{{ product.body|truncatewords:15 }}</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                            <span class="text-muted text-decoration-line-through fw-bold">${{ product.price }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <p>這位賣家目前沒有已售出的商品。</p>
+    {% endfor %}
 </div>
 {% endblock %}
