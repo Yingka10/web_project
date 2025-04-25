@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="container mt-5">
-  <!-- Breadcrumb -->
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'index' %}">首頁</a></li>
@@ -12,70 +11,87 @@
     </ol>
   </nav>
 
-  <h1 class="mb-4">{{ category.name }} 分類下的商品</h1>
-  <p>共有 {{ products.count }} 筆商品</p>
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    
+  <div>
+      <h1 class="mb-1">{{ category.name }} 分類下的商品</h1>
+      <p class="mb-0 text-muted">共有 {{ products|length }} 筆商品</p>
+  </div>
+    <form method="get" class="d-flex align-items-center">
+        <label for="sort" class="me-2">排序：</label> {# Label visible #}
+        <select name="sort" id="sort" class="form-select" onchange="this.form.submit()" style="width: 180px;"> {# Style from index #}
+            <option value="" {% if not request.GET.sort %}selected{% endif %}>預設排序</option> {# Default option check #}
+            <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>價格：低到高</option>
+            <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>價格：高到低</option>
+            <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>上架時間：新到舊</option>
+            <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>上架時間：舊到新</option>
+        </select>
+    </form>
+</div>
 
   <div class="row g-4">
     {% for product in products %}
-    <div class="col-md-4">
-      <!-- 添加卡片懸浮效果：加入 transition 和 hover 效果 -->
-      <div class="card product-card shadow-sm h-100 position-relative mb-4" 
-          style="transition: transform 0.3s ease, box-shadow 0.3s ease;"
-          onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)';" 
-          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
-        
-        {# 賣家信息 - 在圖片上方 #}
-        <div class="card-header bg-light p-2">
-          <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
-            <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
-          </a>
-        </div>
+      <div class="col-md-4">
+        <div class="card product-card shadow-sm h-100 position-relative mb-4"
+            style="transition: transform 0.3s ease, box-shadow 0.3s ease;"
+            onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
 
-        {# 將整個卡片變成可點擊區域 #}
-        <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark" style="position: relative; z-index: 1;">
-          <div class="position-relative">
-            {# 已售出徽章 - 移到圖片內部左上角 #}
-            {% if product.is_sold %}
-              <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 2; transform: rotate(-15deg);">已售出</span>
-              <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 1;"></div>
+          {# 賣家信息 - 在圖片上方 #}
+          <div class="card-header bg-light p-2">
+            {# 確保 product.owner 存在 #}
+            {% if product.owner %}
+              <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
+                <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
+              </a>
+            {% else %}
+               <span class="text-muted"><i class="bi bi-person-circle me-1"></i> 未知賣家</span>
             {% endif %}
+          </div>
 
-            {% with first_image=product.images.first %} {# 嘗試取得第一個 ProductImage 物件 #}
-              {% if first_image and first_image.image and first_image.image.url %} {# 確保物件存在、圖片欄位存在、URL也存在 #}
-                <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
-              {% else %} {# 如果找不到圖片或 URL，顯示 logo #}
-                <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
-              {% endif %}
-            {% endwith %}
+          {# 將整個卡片變成可點擊區域 #}
+          <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark" style="position: relative; z-index: 1;">
+            <div class="position-relative">
+              {# 圖片顯示邏輯 #}
+              {% with first_image=product.images.first %}
+                {% if first_image and first_image.image and first_image.image.url %}
+                  <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                  <img src="{% static 'images/logo.png' %}" class="card-img-top" alt="預設圖片" style="height: 200px; object-fit: cover;">
+                {% endif %}
+              {% endwith %}
+            </div>
 
             <div class="card-body d-flex flex-column">
               <h5 class="card-title">{{ product.title }}</h5>
-              <p class="card-text {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">{{ product.body|truncatewords:15 }}</p>
+              <p class="card-text">{{ product.body|truncatewords:15 }}</p>
               <div class="mt-auto d-flex justify-content-between align-items-center">
-                <span class="text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">${{ product.price }}</span>
-                
-                {# 收藏愛心按鈕 - 放在卡片右下角 #}
-                {% if user.is_authenticated and user != product.owner and not product.is_sold %}
+                <span class="text-primary fw-bold">${{ product.price }}</span>
+
+                {# 收藏愛心按鈕 #}
+                {% if user.is_authenticated and user != product.owner %}
                 <div style="z-index: 10; position: relative;">
                   <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation();">
                     {% if user in product.favorites.all %}
-                    <i class="bi bi-heart-fill text-danger fs-5"></i>
+                      <i class="bi bi-heart-fill text-danger fs-5"></i>
                     {% else %}
-                    <i class="bi bi-heart text-danger fs-5"></i>
+                      <i class="bi bi-heart text-danger fs-5"></i>
                     {% endif %}
                   </a>
                 </div>
                 {% endif %}
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
+        </div>
       </div>
-    </div>
     {% empty %}
-    <p class="text-muted">此分類下目前無商品。</p>
+      <p class="text-muted">此分類下目前無商品。</p>
     {% endfor %}
   </div>
 
-  <a href="{% url 'index' %}" class="btn btn-secondary mt-4">回首頁</a>
+  <div class="text-center mt-4">
+    <a href="{% url 'index' %}" class="btn btn-secondary btn-lg">回首頁</a>
+</div>
 </div>
 {% endblock %}

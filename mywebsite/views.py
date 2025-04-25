@@ -159,13 +159,25 @@ def product_detail(request, id):
 
 def category_products(request, category_id):
     category = get_object_or_404(Category, id=category_id)
-    # 透過 models.ForeignKey 的 related_name 反查該分類下的所有商品
-    products = category.posts.prefetch_related('images').all()
-    categories = Category.objects.all()  # 加這行
+    sort = request.GET.get('sort')
+    products_query = category.posts.filter(is_sold=False).prefetch_related('images').all()
+    categories = Category.objects.all()  
+    # 排序刊登中的商品
+    if sort == 'price_asc':
+        products = products_query.order_by('price')
+    elif sort == 'price_desc':
+        products = products_query.order_by('-price')
+    elif sort == 'date_desc':
+        products = products_query.order_by('-pub_date')
+    elif sort == 'date_asc':
+        products = products_query.order_by('pub_date')
+    else:
+        products = products_query.order_by('-pub_date')  # 預設排序
     return render(request, 'category_products.html', {
         'category': category,
         'products': products,
         'categories': categories,  # 傳給 base.html 的下拉選單用
+        'sort': sort,
     })
 
 def register(request):
