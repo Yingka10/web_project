@@ -159,27 +159,50 @@
 
             </div>
             {% if is_owner %}
-                <div class="mt-5 p-3 border rounded bg-light">
-                    <h4 class="mb-3">預約此商品的用戶</h4>
-                    {% if reservations %}
-                        <ul class="list-group">
-                            {% for reservation in reservations %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>
-                                    <i class="bi bi-person-fill"></i>
-                                    <a href="{% url 'seller_profile' reservation.user.id %}">{{ reservation.user.username }}</a>
-                                </span>
-                                <span class="badge bg-secondary rounded-pill">
-                                {{ reservation.reserved_at|date:"Y/m/d H:i" }}
-                                </span>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">目前尚無用戶預約此商品。</p>
-                    {% endif %}
-                </div>
+    <div class="mt-5 p-3 border rounded bg-light">
+        {% if product.is_sold %}
+            <h4 class="mb-3">商品已售出</h4>
+            <p class="text-success">
+                <i class="bi bi-check-circle-fill"></i>
+                {% if product.buyer %}
+                已售出給 
+                <a href="{% url 'seller_profile' product.buyer.id %}" class="fw-bold text-success">
+                    {{ product.buyer.username }}
+                </a>
+            {% else %}
+                商品已售出
             {% endif %}
+            </p>
+        {% else %}
+        <h4 class="mb-3">預約此商品的用戶</h4>
+        {% if reservations %}
+            <form method="post" action="{% url 'choose_buyer' product.id %}">
+                {% csrf_token %}
+                <ul class="list-group mb-3">
+                    {% for reservation in reservations %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-person-fill"></i>
+                                <a href="{% url 'seller_profile' reservation.user.id %}">{{ reservation.user.username }}</a>
+                                <div class="text-muted small">預約時間：{{ reservation.reserved_at|date:"Y/m/d H:i" }}</div>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="buyer_id" id="buyer_{{ reservation.user.id }}" value="{{ reservation.user.id }}" required>
+                                <label class="form-check-label" for="buyer_{{ reservation.user.id }}">選擇</label>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <button type="submit" class="btn btn-danger" onclick="return confirm('確定要將商品標示為已售出嗎？')">
+                    <i class="bi bi-check-circle-fill"></i> 確認售出
+                </button>
+            </form>
+        {% else %}
+            <p class="text-muted">目前尚無用戶預約此商品。</p>
+        {% endif %}
+    {% endif %}
+    </div>
+{% endif %}
 
         </div>
     </div>

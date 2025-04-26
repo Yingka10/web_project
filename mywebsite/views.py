@@ -396,3 +396,31 @@ def mark_as_sold(request, id):
     else:
         messages.warning(request, "無效的操作請求。")
         return redirect('profile')
+    
+@login_required
+def choose_buyer(request, product_id):
+    product = get_object_or_404(Post, id=product_id, owner=request.user)
+
+    if product.is_sold:
+        messages.warning(request, "這個商品已經售出，不能再選買家了！")
+        return redirect('product_detail', id=product_id)
+    
+    if request.method == 'POST':
+        buyer_id = request.POST.get('buyer_id')
+        if buyer_id:
+            try:
+                buyer = User.objects.get(id=buyer_id)
+                
+                # 標記商品為已售出
+                product.is_sold = True
+                product.buyer = buyer  # （假設 Post 有 buyer 欄位！）
+                product.save()
+
+                messages.success(request, f"商品 '{product.title}' 已成功售出給 {buyer.username}！")
+                return redirect('profile')
+            except User.DoesNotExist:
+                messages.error(request, "所選的買家不存在。")
+        else:
+            messages.error(request, "請選擇一位買家。")
+
+    return redirect('product_detail', id=product_id)

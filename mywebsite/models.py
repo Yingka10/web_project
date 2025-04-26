@@ -19,6 +19,7 @@ class Post(models.Model):
     body = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)  # 新增價格欄位
     pub_date = models.DateTimeField(auto_now_add=True)
+    buyer = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='purchased_posts')
     # 新增與 Category 的關聯，若你希望此欄位為必填就省略 null 與 blank 參數
     category = models.ForeignKey(
         Category,
