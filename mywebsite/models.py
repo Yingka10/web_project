@@ -48,6 +48,8 @@ class Post(models.Model):
     # 新增：標記商品是否已被預約或售出 (可選，但建議)
     is_reserved = models.BooleanField("已被預約", default=False)
     is_sold = models.BooleanField("已售出", default=False)
+    is_selected = models.BooleanField(default=False)
+    
 
 
     class Meta:
@@ -79,7 +81,9 @@ class Reservation(models.Model):
     product = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reservations', verbose_name="預約商品")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations', verbose_name="預約者")
     reserved_at = models.DateTimeField("預約時間", default=timezone.now)
+    is_selected = models.BooleanField(default=False)
     # 可以考慮加入其他欄位，例如：預約狀態 (pending, confirmed, cancelled)
+
 
     class Meta:
         verbose_name = "預約紀錄"
@@ -88,4 +92,13 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f"{self.user.username} 預約了 {self.product.title}"
+    
+# class Notification(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+#     message = models.TextField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     is_read = models.BooleanField(default=False)
+
+#     def __str__(self):
+#         return f"通知給 {self.user.username}: {self.message}"
 

@@ -39,7 +39,8 @@ urlpatterns = [
     path('product/<int:id>/reserve/', views.reserve_product, name='reserve_product'),
     path('product/<int:id>/cancel_reservation/', views.cancel_reservation, name='cancel_reservation'), # 可選
     path('product/<int:id>/mark_sold/', views.mark_as_sold, name='mark_as_sold'),
-    path('product/<int:product_id>/choose_buyer/', views.choose_buyer, name='choose_buyer')
+    path('product/<int:product_id>/choose_buyer/', views.choose_buyer, name='choose_buyer'),
+     path('notifications/', views.notification_list, name='notification_list')
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:

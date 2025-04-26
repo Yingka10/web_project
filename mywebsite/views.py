@@ -14,7 +14,7 @@ import json
 import cloudinary
 from django.conf import settings
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Reservation,Post
 
 
 
@@ -69,11 +69,14 @@ def profile(request):
     all_my_posts = request.user.posts.prefetch_related('images').all() # 先獲取所有商品
     active_posts = all_my_posts.filter(is_sold=False) # 篩選出未售出的
     sold_posts = all_my_posts.filter(is_sold=True)   # 篩選出已售出的
+    purchased_posts = Post.objects.filter(buyer=request.user, is_sold=True)\
+                                   .prefetch_related('images')  # 自己買的商品（別人賣給你的）
     return render(request, "profile.html", {
         'favorites': favorites,
         'user_reservations': user_reservations,
         'active_posts': active_posts,
-        'sold_posts': sold_posts 
+        'sold_posts': sold_posts,
+        'purchased_posts': purchased_posts  # 新加的 
     })
 
 @csrf_exempt
@@ -424,3 +427,8 @@ def choose_buyer(request, product_id):
             messages.error(request, "請選擇一位買家。")
 
     return redirect('product_detail', id=product_id)
+
+def notification_list(request):
+    # 假設你有通知資料要傳給前端
+    # notifications = Notification.objects.all()
+    return render(request, 'notifications/list.html')
