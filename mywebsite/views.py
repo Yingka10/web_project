@@ -14,7 +14,7 @@ import json
 import cloudinary
 from django.conf import settings
 from django.contrib.auth.models import User
-from .models import Reservation,Post
+from .models import Reservation,Post, Notification
 
 
 
@@ -38,11 +38,19 @@ def homepage(request):
         products = products.order_by('pub_date')   # 由舊到新
     else:
         products = products.all()
-
+       # 加這一段（計算未讀通知數量 + 撈通知）
+    unread_count = 0
+    notifications = []
+    if request.user.is_authenticated:
+        unread_count = request.user.notifications.filter(is_read=False).count()
+        notifications = request.user.notifications.all()[:5]  # 只撈最新5筆通知
+        
     return render(request, "index.html", {
         'products': products,
         'categories': categories,
         'sort': sort,  # 把目前的排序傳給模板，方便下拉選單顯示狀態
+        'unread_count': unread_count,  # 加進 context
+        'notifications': notifications,
     })
 
 
@@ -393,6 +401,15 @@ def mark_as_sold(request, id):
         # 將商品標示為已售出
         product.is_sold = True
         product.save()
+        # ✅ 嘗試找到有預約的買家
+        reservation = Reservation.objects.filter(product=product).first()
+        if reservation:
+            buyer = reservation.user
+            # ✅ 建立通知
+            Notification.objects.create(
+                user=buyer,
+                message=f"你預約的商品『{product.title}』已成功購買！"
+            )
         messages.success(request, f"商品 '{product.title}' 已成功標示為已售出。")
         return redirect('profile')
      
@@ -428,7 +445,9 @@ def choose_buyer(request, product_id):
 
     return redirect('product_detail', id=product_id)
 
+@login_required
 def notification_list(request):
-    # 假設你有通知資料要傳給前端
-    # notifications = Notification.objects.all()
-    return render(request, 'notifications/list.html')
+    notifications = request.user.notifications.order_by('-created_at')
+    return render(request, 'notification_list.html', {  # 這裡改成 'notification_list.html'
+        'notifications': notifications,
+    })

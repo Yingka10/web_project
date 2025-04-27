@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>通知中心</h2>
+    <ul class="list-group">
+        {% for notification in notifications %}
+            <li class="list-group-item {% if not notification.is_read %}list-group-item-warning{% endif %}">
+                {{ notification.message }}
+                <br>
+                <small class="text-muted">{{ notification.created_at|timesince }}前</small>
+            </li>
+        {% empty %}
+            <li class="list-group-item">目前沒有通知</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
