@@ -188,11 +188,15 @@
               <p class="card-text text-muted text-decoration-line-through fw-bold">價格: ${{ product.price }}</p>
               {# 可以選擇不顯示預約人數 #}
               <div class="mt-auto">
-                 <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-secondary">
-                     查看狀態
-                 </a>
-                 {# 不再顯示標示售出的按鈕 #}
-               </div>
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-search"></i> 查看詳情
+                </a>
+                {% if product.can_rate_buyer %}
+                    <a href="{% url 'rate_buyer' product.id %}" class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-star"></i> 評價買家
+                    </a>
+                {% endif %}
+            </div>
             </div>
           </div>
         </div>
@@ -232,9 +236,15 @@
               {% endif %}
   
               <div class="mt-auto">
-                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-secondary">
-                  查看商品
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-search"></i> 查看詳情
                 </a>
+                {% if product.can_rate_seller %}
+                    <a href="{% url 'rate_seller' product.id %}" class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-star"></i> 評價賣家
+                    </a>
+                {% endif %}
+              </div>
               </div>
             </div>
           </div>

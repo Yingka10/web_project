@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}評價買家{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>評價買家：{{ buyer.username }}</h1>
+    <h2>商品：{{ post.title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="score" class="form-label">評分 (1 - 5 星)</label>
+            <select class="form-select" id="score" name="score" required>
+                <option value="" selected disabled>-- 請選擇評分 --</option>
+                {% for i in ''|ljust:5 %}
+                    {% with score=forloop.counter %}
+                        <option value="{{ score }}">{{ score }} 星</option>
+                    {% endwith %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="comment" class="form-label">評論</label>
+            <textarea class="form-control" id="comment" name="comment" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">提交評價</button>
+    </form>
+</div>
+{% endblock %}

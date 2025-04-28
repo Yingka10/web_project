@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from mywebsite.views import homepage, api, register, login, profile, sell, product_detail, category_products
+from mywebsite.views import homepage, api, register, login, profile, sell, product_detail, category_products, rate_seller, rate_buyer, seller_profile
 from mywebsite import views
 from django.contrib.auth import views as auth_views
 
@@ -35,12 +35,14 @@ urlpatterns = [
     path('search/', views.product_search, name='product_search'),
     path('toggle_favorite/<int:id>/', views.toggle_favorite, name='toggle_favorite'),
     path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'), # 加入登出 URL，登出後導向首頁
-    path('seller/<int:user_id>/', views.seller_profile, name='seller_profile'),
+    path('seller/<int:seller_id>/', seller_profile, name='seller_profile'),
     path('product/<int:id>/reserve/', views.reserve_product, name='reserve_product'),
     path('product/<int:id>/cancel_reservation/', views.cancel_reservation, name='cancel_reservation'), # 可選
     path('product/<int:id>/mark_sold/', views.mark_as_sold, name='mark_as_sold'),
     path('product/<int:product_id>/choose_buyer/', views.choose_buyer, name='choose_buyer'),
-    path('notifications/', views.notification_list, name='notification_list')
+    path('notifications/', views.notification_list, name='notification_list'),
+    path('rate_seller/<int:post_id>/', rate_seller, name='rate_seller'),
+    path('rate_buyer/<int:post_id>/', rate_buyer, name='rate_buyer'),
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:

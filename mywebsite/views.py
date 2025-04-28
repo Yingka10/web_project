@@ -3,7 +3,7 @@ from django.utils import timezone # 引入 timezone
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
-from mywebsite.models import Post, Category, Reservation , ProductImage
+from mywebsite.models import Post, Category, Reservation , ProductImage, Rating, Notification, CustomUser, User
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -14,7 +14,6 @@ import json
 import cloudinary
 from django.conf import settings
 from django.contrib.auth.models import User
-from .models import Reservation,Post, Notification
 
 
 
@@ -70,21 +69,26 @@ def toggle_favorite(request, id):
 @login_required
 def profile(request):
     favorites = request.user.favorite_posts.prefetch_related('images').all()
-    user_reservations = Reservation.objects.filter(user=request.user)\
-                                        .select_related('product')\
-                                        .prefetch_related('product__images')\
-                                        .order_by('-reserved_at')
-    all_my_posts = request.user.posts.prefetch_related('images').all() # 先獲取所有商品
-    active_posts = all_my_posts.filter(is_sold=False) # 篩選出未售出的
-    sold_posts = all_my_posts.filter(is_sold=True)   # 篩選出已售出的
-    purchased_posts = Post.objects.filter(buyer=request.user, is_sold=True)\
-                                   .prefetch_related('images')  # 自己買的商品（別人賣給你的）
+    user_reservations = request.user.reservations.select_related('product').prefetch_related('product__images').order_by(
+        '-reserved_at')
+    all_my_posts = request.user.posts.prefetch_related('images').all()
+    active_posts = all_my_posts.filter(is_sold=False)
+    sold_posts = all_my_posts.filter(is_sold=True)
+    purchased_posts = Post.objects.filter(buyer=request.user, is_sold=True).prefetch_related('images')
+
+    for post in sold_posts:
+        if post.buyer:
+            post.can_rate_buyer = not Rating.objects.filter(rater=request.user, rated=post.buyer, post=post).exists()
+
+    for post in purchased_posts:
+        post.can_rate_seller = not Rating.objects.filter(rater=request.user, rated=post.owner, post=post).exists()
+
     return render(request, "profile.html", {
         'favorites': favorites,
         'user_reservations': user_reservations,
         'active_posts': active_posts,
         'sold_posts': sold_posts,
-        'purchased_posts': purchased_posts  # 新加的 
+        'purchased_posts': purchased_posts
     })
 
 @csrf_exempt
@@ -301,11 +305,13 @@ def product_search(request):
     }
     return render(request, "product_search.html", context)
 
-def seller_profile(request, user_id):
-    seller = get_object_or_404(User, id=user_id)
-    seller_posts = seller.posts.all()
+def seller_profile(request, seller_id):
+    seller = get_object_or_404(CustomUser, id=seller_id)
 
     sort = request.GET.get('sort') 
+
+    # 獲取賣家的所有商品
+    seller_posts = seller.posts.all()
 
     # 分開刊登中和已售出的商品
     active_posts = seller_posts.filter(is_sold=False)
@@ -451,3 +457,56 @@ def notification_list(request):
     return render(request, 'notification_list.html', {  # 這裡改成 'notification_list.html'
         'notifications': notifications,
     })
+@login_required
+def rate_seller(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    seller = post.owner
+
+    if request.method == 'POST':
+        score = request.POST.get('score')
+        comment = request.POST.get('comment')
+        if score:
+            try:
+                score = int(score)
+                Rating.objects.create(rater=request.user, rated=seller, post=post, score=score, comment=comment)
+                messages.success(request, "評分成功！")
+                return redirect('profile')
+            except ValueError:
+                messages.error(request, "請選擇有效的評分。")
+        else:
+            messages.error(request, "請選擇評分。")
+
+    return render(request, "rate_seller.html", {'post': post, 'seller': seller})
+
+
+@login_required
+def rate_buyer(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    buyer = post.buyer
+
+    if request.method == 'POST':
+        score = request.POST.get('score')
+        comment = request.POST.get('comment')
+        if score:
+            try:
+                score = int(score)
+                Rating.objects.create(rater=request.user, rated=buyer, post=post, score=score, comment=comment)
+                messages.success(request, "評分成功！")
+                return redirect('profile')
+            except ValueError:
+                messages.error(request, "請選擇有效的評分。")
+        else:
+            messages.error(request, "請選擇評分。")
+
+    return render(request, "rate_buyer.html", {'post': post, 'buyer': buyer})
+
+def some_view(request):
+    # 假設獲得了一個 buyer_id
+    buyer_id = request.POST.get('buyer_id')
+    try:
+        buyer = get_object_or_404(CustomUser, id=buyer_id)
+        # 創建或更新 Post 記錄
+        post = Post.objects.create("Some Title", buyer=buyer)
+    except CustomUser.DoesNotExist:
+        # 處理用戶不存在的情況
+        pass
