@@ -32,7 +32,7 @@ urlpatterns = [
     path('product/<int:id>/', product_detail, name='product_detail'),
     path('admin/', admin.site.urls),
     path('category/<int:category_id>/', category_products, name='category_products'),
-    path('search/', views.product_search, name='product_search'),
+    path('search/', views.combined_search, name='combined_search'),
     path('toggle_favorite/<int:id>/', views.toggle_favorite, name='toggle_favorite'),
     path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'), # 加入登出 URL，登出後導向首頁
     path('seller/<int:seller_id>/', seller_profile, name='seller_profile'),

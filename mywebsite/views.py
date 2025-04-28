@@ -292,25 +292,26 @@ def sell(request):
         'categories': Category.objects.all()  # 傳遞分類資料
     })
 
-def product_search(request):
-    # 從 GET 請求中取得關鍵字，參數名稱 "q" 可以依需求修改
+def combined_search(request):
     query = request.GET.get('q', '')
-    
-    # 如果有輸入關鍵字，則進行搜尋
+    product_results = Post.objects.none() 
+    seller_results = CustomUser.objects.none()
+
     if query:
-        # 使用 Q 可在多個欄位中進行搜尋，例如商品標題和內文
-        results = Post.objects.prefetch_related('images').filter(
-            Q(title__icontains=query) | Q(body__icontains=query)
-        )
-    else:
-        # 如果沒有輸入關鍵字，可以傳回空的 QuerySet 或全部商品，視需求而定
-        results = Post.objects.none()
-    
+
+        product_results = Post.objects.prefetch_related('images', 'owner').filter(
+            (Q(title__icontains=query) | Q(body__icontains=query)) & Q(is_sold=False)
+        ).distinct() 
+ 
+        seller_results = CustomUser.objects.filter(username__icontains=query)
+
     context = {
         'query': query,
-        'results': results,
+        'product_results': product_results,
+        'seller_results': seller_results,
     }
-    return render(request, "product_search.html", context)
+
+    return render(request, "combined_search.html", context) #
 
 def seller_profile(request, seller_id):
     seller = get_object_or_404(CustomUser, id=seller_id)
