@@ -1,7 +1,18 @@
 /* 自訂 CSS */
 body {
   padding-top: 70px;
-  background: #f8f9fa;
+  background: #f8f3e0;
+  font-family: "Noto Serif TC", serif;
+  font-weight: 500;
+}
+
+.navbar {
+  background:#399e9c;
+}
+
+.navbar-nav .nav-link {
+  color: #fff !important;
+  font-size: 20px;
 }
 
 .navbar-brand {
@@ -9,14 +20,52 @@ body {
   font-size: 1.8rem;
 }
 
-/* Hero 區塊 */
+.btn-outline-danger, .btn-outline-dark {
+  color: #fff; 
+  border-color: #fff;
+}
+.btn-outline-danger:hover, .btn-outline-dark:hover {
+  color: #0d3f30; 
+  background-color: #cde0d4; ;
+  border-color: #cde0d4;
+}
+
+.btn-outline-success {
+  color: #0d3f30; 
+  background-color: #cde0d4; 
+  border-color: #cde0d4;
+}
+.btn-outline-success:hover {
+  color: #0d3f30; 
+  background-color: #aad0b7; 
+  border-color: #aad0b7; 
+}
+.btn-warning{
+  color: #fff; 
+  background-color: #d64633; 
+  border-color: #d64633;
+}
+.btn-warning:hover{
+  color: #fff; 
+  background-color: #c1402f; 
+  border-color: #c1402f;
+}
+.form-control {
+  background-color: #f8f3e0;
+  color: #2e3236; 
+}
+.notification-icon {
+  font-size: 26px;
+}
+
 .hero {
-  background: url('https://via.placeholder.com/1200x400') no-repeat center center;
+  background: url('https://img.freepik.com/free-photo/pair-shopping-cart-miniatures_23-2148081027.jpg?ga=GA1.1.1157158044.1745850966&semt=ais_hybrid&w=740') no-repeat center center;
   background-size: cover;
   color: #fff;
   text-align: center;
   padding: 100px 0;
   position: relative;
+  background-color: #fdfdfd;
 }
 
 .hero::after {
@@ -26,7 +75,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.25);
 }
 
 .hero .container {
@@ -36,13 +85,12 @@ body {
 
 .hero h1 {
   font-size: 3rem;
-  text-shadow: 2px 2px 4px #000;
+  text-shadow: 1px 1px 3px #000;
 }
 
 .hero p {
   font-size: 2rem;
-  font-family:"微軟正黑體", "Microsoft JhengHei", sans-serif;
-  text-shadow: 2px 2px 4px #000;
+  text-shadow: 1px 1px 3px #000;
 }
 
 /* 商品卡片 */
