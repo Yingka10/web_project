@@ -14,6 +14,7 @@ import json
 import cloudinary
 from django.conf import settings
 from django.contrib.auth.models import User
+from .form import CustomUserCreationForm
 
 
 
@@ -197,13 +198,19 @@ def category_products(request, category_id):
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()  # 建立新使用者
             auth_login(request, user) # 註冊後自動登入 (可選)
+            messages.success(request, "註冊成功！歡迎加入我們！")
             return redirect('index')  # 註冊成功後導向首頁
+        else:
+            # 表單無效時，顯示具體的錯誤訊息
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, f"{field.label}: {error}")
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, "register.html", {'form': form}) # 將 form 傳遞給模板
 
 def login(request):
