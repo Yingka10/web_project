@@ -3,258 +3,273 @@
 {% block title %}個人頁面{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h1 class="text-center my-4">個人頁面 - {{ user.username }}</h1>
-  <p class="text-center mb-5">管理您的收藏和上架商品。</p>
+<div class="container-fluid mt-3">
 
-  <section class="mb-5">
-    <h2 class="mb-4">我的收藏 <i class="bi bi-bookmark-heart-fill text-danger"></i></h2>
-    <div class="row g-4">
-    {% for product in favorites %} 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm {% if product.is_sold %}border-secondary opacity-75{% endif %}">
-                {% if product.is_sold %}
-                    <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
-                {% endif %}
+  <div class="row">
+      {# 左側選單欄 #}
+      <div class="col-md-2 mb-4">
+          {# 將標題和描述移到側邊欄的最上方 #}
+          <h1 class="mb-2 h4">個人頁面 - {{ user.username }}</h1> {# 可以調整標題大小，例如用 h4 #}
+          <p class="text-muted mb-3">管理您的收藏和上架商品。</p>
 
-                {% with first_image=product.images.first %}
-                    {% if first_image and first_image.image and first_image.image.url %}
-                        <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
-                    {% endif %}
-                {% endwith %}
-
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ product.title }}</h5>
-                    <p class="card-text text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
-
-                    {% if product.owner %}
-                    <p class="card-text small text-muted">
-                        <i class="bi bi-person-circle"></i> 賣家: <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a> {# cite: 3, 16 #}
-                    </p>
-                    {% endif %}
-                  
-
-                    <div class="mt-auto"> {# 將按鈕推至底部 #}
-                      <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info"> {# 查看詳情連結 #}
-                        <i class="bi bi-search"></i> 查看詳情
-                      </a>
-                        {# 只有未售出的商品才能移除收藏 #}
-                        {% if not product.is_sold %}
-                            <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('確定要取消對「{{ product.title }}」的收藏嗎？');">
-                              <i class="bi bi-heartbreak-fill"></i> 移除收藏
-                            </a>
-                        {% else %}
-                             <button class="btn btn-sm btn-secondary ms-2" disabled>商品已售出</button>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% empty %}
-        <p class="text-muted">您還沒有收藏任何商品。</p>
-    {% endfor %}
-    </div>
-</section>
-
-  <section class="mb-5">
-    <h2 class="mb-4">我預約的商品 <i class="bi bi-calendar-check text-success"></i></h2>
-    <div class="row g-4">
-    {% for reservation in user_reservations %} 
-        {% with product=reservation.product %} 
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm {% if product.is_sold %}border-secondary opacity-75{% endif %}"> {# 如果商品已售出，加上樣式 #}
-                {% if product.is_sold %}
-                    <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span> {# 已售出標籤 #}
-                {% endif %}
-                {# 顯示商品圖片 #}
-                {% with first_image=product.images.first %} {# 取得第一張圖片 #}
-                    {% if first_image and first_image.image and first_image.image.url %}
-                        <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
-                    {% else %}
-                        <img src="{% static 'images/logo.png' %}" class="card-img-top" alt="預設圖片" style="height: 200px; object-fit: cover;">
-                    {% endif %}
-                {% endwith %}
-
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ product.title }}</h5> {# 商品標題 #}
-                    <p class="card-text text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p> {# 商品價格 #}
-                    <p class="card-text small text-muted">
-                        <i class="bi bi-clock"></i> 預約於: {{ reservation.reserved_at|date:"Y/m/d H:i" }} {# 顯示預約時間 #}
-                    </p>
-                    {% if product.owner %}
-                    <p class="card-text small text-muted">
-                        <i class="bi bi-person-circle"></i> 賣家: <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a> {# 顯示賣家連結 #}
-                    </p>
-                    {% endif %}
-
-                    {# 操作按鈕 #}
-                    <div class="mt-auto">
-                        <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info"> {# 查看詳情連結 #}
-                            <i class="bi bi-search"></i> 查看詳情
-                        </a>
-                        {# 只有當商品尚未售出時，才顯示取消預約按鈕 #}
-                        {% if not product.is_sold %} {# cite: 16 #}
-                            <a href="{% url 'cancel_reservation' product.id %}" class="btn btn-sm btn-outline-warning ms-2" onclick="return confirm('確定要取消對「{{ product.title }}」的預約嗎？');"> 
-                                <i class="bi bi-calendar-x"></i> 取消預約
-                            </a>
-                        {% else %}
-                             <button class="btn btn-sm btn-secondary ms-2" disabled><i class="bi bi-cart-x"></i> 商品已售出</button>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endwith %}
-    {% empty %} {# 如果沒有任何預約紀錄 #}
-        <p class="text-muted">您還沒有預約任何商品。</p>
-    {% endfor %}
-    </div>
-</section>
-
-  {# 1. 我上架的商品 (未售出) #}
-  <section class="mb-5">
-    <h2 class="mb-4">我刊登中的商品<i class="bi bi-tags-fill text-primary"></i></h2>
-    <div class="row g-4">
-      {% for product in active_posts %}
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm position-relative">
-      
-
-            {# 顯示圖片 #}
-            {% with img_to_display=product.get_first_image %}
-                {% if img_to_display and img_to_display.url %}
-                    <img src="{{ img_to_display.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
-                {% else %}
-                    <img src="{% static 'images/logo.png' %}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="預設圖片">
-                {% endif %}
-            {% endwith %}
-
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ product.title }}</h5>
-              <p class="card-text text-primary fw-bold">價格: ${{ product.price }}</p> {# 正常顯示價格 #}
-              {% with product.reservations.count as reservation_count %}
-                {% if reservation_count > 0 %}
-                  <p class="card-text text-info small">
-                      <i class="bi bi-calendar-check-fill"></i> {{ reservation_count }} 人預約
-                  </p>
-                {% endif %}
-              {% endwith %}
-              <div class="mt-auto">
-                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
-                  <i class="bi bi-search"></i>查看詳情 & 預約者
-                 </a>
-                 {# 顯示標示售出的按鈕 #}
-                 <form action="{% url 'mark_as_sold' product.id %}" method="post" class="d-inline ms-2">
-                     {% csrf_token %}
-                     <button type="submit" class="btn btn-sm btn-outline-danger" title="標示為已售出" onclick="return confirm('確定要將此商品標示為已售出嗎？');">
-                         <i class="bi bi-cart-x"></i> 售出
-                     </button>
-                 </form>
-               </div>
-            </div>
+          {# 按鈕選單 (使用 d-grid 和 gap-2) #}
+          <div class="d-grid gap-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+              {# 選單項目 1: 我的收藏 (使用 btn 樣式) #}
+              <button class="btn btn-outline-primary text-start active" id="v-pills-favorites-tab" data-bs-toggle="pill" data-bs-target="#v-pills-favorites" type="button" role="tab" aria-controls="v-pills-favorites" aria-selected="true">
+                  <i class="bi bi-bookmark-heart-fill text-danger me-2"></i>我的收藏
+              </button>
+              {# 選單項目 2: 我預約的商品 #}
+              <button class="btn btn-outline-primary text-start" id="v-pills-reservations-tab" data-bs-toggle="pill" data-bs-target="#v-pills-reservations" type="button" role="tab" aria-controls="v-pills-reservations" aria-selected="false">
+                  <i class="bi bi-calendar-check text-success me-2"></i>我預約的商品
+              </button>
+              {# 選單項目 3: 我購買的商品 #}
+               <button class="btn btn-outline-primary text-start" id="v-pills-purchased-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-purchased-posts" type="button" role="tab" aria-controls="v-pills-purchased-posts" aria-selected="false">
+                  <i class="bi bi-bag-check-fill text-success me-2"></i>我購買的商品
+              </button>
+              {# 選單項目 4: 我刊登中的商品 #}
+               <button class="btn btn-outline-primary text-start" id="v-pills-active-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-active-posts" type="button" role="tab" aria-controls="v-pills-active-posts" aria-selected="false">
+                  <i class="bi bi-tags-fill text-primary me-2"></i>我刊登中的商品
+              </button>
+               {# 選單項目 5: 我已售出的商品 #}
+              <button class="btn btn-outline-primary text-start" id="v-pills-sold-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-sold-posts" type="button" role="tab" aria-controls="v-pills-sold-posts" aria-selected="false">
+                  <i class="bi bi-cart-check-fill text-secondary me-2"></i>我已售出的商品
+              </button>
           </div>
-        </div>
-      {% empty %}
-        <p class="text-muted">您目前沒有刊登中的商品。 <a href="{% url 'sell' %}">前往上架</a></p>
-      {% endfor %}
-    </div>
-  </section>
+      </div>
 
-  {# 2. 我已售出的商品 #}
-  <section>
-    <h2 class="mb-4">我已售出的商品<i class="bi bi-cart-check-fill text-secondary"></i></h2>
-    <div class="row g-4">
-      {% for product in sold_posts %}
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm position-relative">
-             {# 顯示已售出徽章 #}
-             <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
-             <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 0; pointer-events: none;"></div>
+      {# 右側內容顯示區 #}
+      <div class="col-md-10">
 
-             {# 顯示圖片 (變暗) #}
-            {% with img_to_display=product.get_first_image %}
-                {% if img_to_display and img_to_display.url %}
-                    <img src="{{ img_to_display.url }}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
-                {% else %}
-                    <img src="{% static 'images/logo.png' %}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="預設圖片">
-                {% endif %}
-            {% endwith %}
+          <div class="tab-content" id="v-pills-tabContent">
 
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ product.title }}</h5>
-              {# 價格變灰且劃掉 #}
-              <p class="card-text text-muted text-decoration-line-through fw-bold">價格: ${{ product.price }}</p>
-              {# 可以選擇不顯示預約人數 #}
-              <div class="mt-auto">
-                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
-                    <i class="bi bi-search"></i> 查看詳情
-                </a>
-                {% if product.can_rate_buyer %}
-                    <a href="{% url 'rate_buyer' product.id %}" class="btn btn-sm btn-outline-warning">
-                        <i class="bi bi-star"></i> 評價買家
-                    </a>
-                {% endif %}
-            </div>
-            </div>
-          </div>
-        </div>
-      {% empty %}
-        <p class="text-muted">您還沒有已售出的商品記錄。</p>
-      {% endfor %}
-    </div>
-  </section>
-  
-  <section class="mt-5">
-    <h2 class="mb-4">我購買的商品<i class="bi bi-bag-check-fill text-success"></i></h2>
-    <div class="row g-4">
-      {% for product in purchased_posts %}
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm position-relative">
-            
-            <span class="badge bg-success position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已購買</span>
-            <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 0; pointer-events: none;"></div>
-  
-            {% with first_image=product.images.first %}
-                {% if first_image and first_image.image and first_image.image.url %}
-                    <img src="{{ first_image.image.url }}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
-                {% else %}
-                    <img src="{% static 'images/logo.png' %}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="預設圖片">
-                {% endif %}
-            {% endwith %}
-  
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ product.title }}</h5>
-              <p class="card-text text-muted text-decoration-line-through fw-bold">價格: ${{ product.price }}</p>
-  
-              {% if product.owner %}
-              <p class="card-text small text-muted">
-                <i class="bi bi-person-circle"></i> 賣家: 
-                <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a>
-              </p>
-              {% endif %}
-  
-              <div class="mt-auto">
-                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
-                    <i class="bi bi-search"></i> 查看詳情
-                </a>
-                {% if product.can_rate_seller %}
-                    <a href="{% url 'rate_seller' product.id %}" class="btn btn-sm btn-outline-warning">
-                        <i class="bi bi-star"></i> 評價賣家
-                    </a>
-                {% endif %}
+              {# 內容區塊 1: 我的收藏 #}
+              <div class="tab-pane fade show active" id="v-pills-favorites" role="tabpanel" aria-labelledby="v-pills-favorites-tab" tabindex="0">
+                  <h2 class="mb-4">我的收藏 <i class="bi bi-bookmark-heart-fill text-danger"></i></h2>
+                  <div class="row g-4">
+                  {% for product in favorites %}
+                      <div class="col-md-6">
+                          <div class="card h-100 shadow-sm {% if product.is_sold %}border-secondary opacity-75{% endif %}">
+                              {% if product.is_sold %}
+                                  <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
+                              {% endif %}
+                              {% with first_image=product.images.first %}
+                                  {% if first_image and first_image.image and first_image.image.url %}
+                                      <img src="{{ first_image.image.url }}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+                                  {% else %}
+                                      <img src="{% static 'images/logo.png' %}" class="card-img-top {% if product.is_sold %}opacity-75{% endif %}" alt="預設圖片" style="height: 200px; object-fit: cover;">
+                                  {% endif %}
+                              {% endwith %}
+                              <div class="card-body d-flex flex-column">
+                                  <h5 class="card-title">{{ product.title }}</h5>
+                                  <p class="card-text text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
+                                  {% if product.owner %}
+                                  <p class="card-text small text-muted">
+                                      <i class="bi bi-person-circle"></i> 賣家: <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a>
+                                  </p>
+                                  {% endif %}
+                                  <div class="mt-auto">
+                                    <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
+                                      <i class="bi bi-search"></i> 查看詳情
+                                    </a>
+                                    {% if not product.is_sold %}
+                                      <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('確定要取消對「{{ product.title }}」的收藏嗎？');">
+                                        <i class="bi bi-heartbreak-fill"></i> 移除收藏
+                                      </a>
+                                    {% else %}
+                                         <button class="btn btn-sm btn-secondary ms-2" disabled>商品已售出</button>
+                                    {% endif %}
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  {% empty %}
+                      <p class="text-muted">您還沒有收藏任何商品。</p>
+                  {% endfor %}
+                  </div>
               </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      {% empty %}
-        <p class="text-muted">您還沒有購買過任何商品喔！</p>
-      {% endfor %}
-    </div>
-  </section>
-</div>
 
+              {# 內容區塊 2: 我預約的商品 #}
+              <div class="tab-pane fade" id="v-pills-reservations" role="tabpanel" aria-labelledby="v-pills-reservations-tab" tabindex="0">
+                  <h2 class="mb-4">我預約的商品 <i class="bi bi-calendar-check text-success"></i></h2>
+                  <div class="row g-4">
+                  {% for reservation in user_reservations %}
+                      {% with product=reservation.product %}
+                       <div class="col-md-6">
+                         <div class="card h-100 shadow-sm {% if product.is_sold %}border-secondary opacity-75{% endif %}">
+                              {% if product.is_sold %}
+                                  <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
+                              {% endif %}
+                              {% with first_image=product.images.first %}
+                                  {% if first_image and first_image.image and first_image.image.url %}
+                                      <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+                                  {% else %}
+                                      <img src="{% static 'images/logo.png' %}" class="card-img-top" alt="預設圖片" style="height: 200px; object-fit: cover;">
+                                  {% endif %}
+                              {% endwith %}
+                              <div class="card-body d-flex flex-column">
+                                  <h5 class="card-title">{{ product.title }}</h5>
+                                  <p class="card-text text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
+                                  <p class="card-text small text-muted">
+                                      <i class="bi bi-clock"></i> 預約於: {{ reservation.reserved_at|date:"Y/m/d H:i" }}
+                                  </p>
+                                  {% if product.owner %}
+                                  <p class="card-text small text-muted">
+                                      <i class="bi bi-person-circle"></i> 賣家: <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a>
+                                  </p>
+                                  {% endif %}
+                                  <div class="mt-auto">
+                                    <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-search"></i> 查看詳情
+                                    </a>
+                                    {% if not product.is_sold %}
+                                        <a href="{% url 'cancel_reservation' product.id %}" class="btn btn-sm btn-outline-warning ms-2" onclick="return confirm('確定要取消對「{{ product.title }}」的預約嗎？');">
+                                            <i class="bi bi-calendar-x"></i> 取消預約
+                                        </a>
+                                    {% else %}
+                                         <button class="btn btn-sm btn-secondary ms-2" disabled><i class="bi bi-cart-x"></i> 商品已售出</button>
+                                    {% endif %}
+                                  </div>
+                              </div>
+                          </div>
+                       </div>
+                      {% endwith %}
+                  {% empty %}
+                      <p class="text-muted">您還沒有預約任何商品。</p>
+                  {% endfor %}
+                  </div>
+              </div>
+
+              {# 內容區塊 3: 我購買的商品 #}
+              <div class="tab-pane fade" id="v-pills-purchased-posts" role="tabpanel" aria-labelledby="v-pills-purchased-posts-tab" tabindex="0">
+                  <h2 class="mb-4">我購買的商品<i class="bi bi-bag-check-fill text-success"></i></h2>
+                   <div class="row g-4">
+                      {% for product in purchased_posts %}
+                      <div class="col-md-6">
+                         <div class="card h-100 shadow-sm position-relative">
+                             <span class="badge bg-success position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已購買</span>
+                             <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 0; pointer-events: none;"></div>
+                              {% with first_image=product.images.first %}
+                                  {% if first_image and first_image.image and first_image.image.url %}
+                                      <img src="{{ first_image.image.url }}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
+                                  {% else %}
+                                      <img src="{% static 'images/logo.png' %}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="預設圖片">
+                                  {% endif %}
+                              {% endwith %}
+                              <div class="card-body d-flex flex-column">
+                                  <h5 class="card-title">{{ product.title }}</h5>
+                                  <p class="card-text text-muted text-decoration-line-through fw-bold">價格: ${{ product.price }}</p>
+                                  {% if product.owner %}
+                                  <p class="card-text small text-muted">
+                                      <i class="bi bi-person-circle"></i> 賣家:
+                                      <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a>
+                                  </p>
+                                  {% endif %}
+                                  <div class="mt-auto">
+                                      <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
+                                          <i class="bi bi-search"></i> 查看詳情
+                                      </a>
+                                       {% if product.can_rate_seller %}
+                                          <a href="{% url 'rate_seller' product.id %}" class="btn btn-sm btn-outline-warning ms-2">
+                                              <i class="bi bi-star"></i> 評價賣家
+                                          </a>
+                                      {% endif %}
+                                  </div>
+                                  </div>
+                              </div>
+                         </div>
+                      {% empty %}
+                          <p class="text-muted">您還沒有購買過任何商品喔！</p>
+                      {% endfor %}
+                   </div>
+              </div>
+
+               {# 內容區塊 4: 我刊登中的商品 #}
+              <div class="tab-pane fade" id="v-pills-active-posts" role="tabpanel" aria-labelledby="v-pills-active-posts-tab" tabindex="0">
+                   <h2 class="mb-4">我刊登中的商品<i class="bi bi-tags-fill text-primary"></i></h2>
+                   <div class="row g-4">
+                      {% for product in active_posts %}
+                      <div class="col-md-6">
+                         <div class="card h-100 shadow-sm position-relative">
+                              {% with img_to_display=product.get_first_image %}
+                                  {% if img_to_display and img_to_display.url %}
+                                      <img src="{{ img_to_display.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
+                                  {% else %}
+                                      <img src="{% static 'images/logo.png' %}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="預設圖片">
+                                  {% endif %}
+                              {% endwith %}
+                              <div class="card-body d-flex flex-column">
+                                  <h5 class="card-title">{{ product.title }}</h5>
+                                  <p class="card-text text-primary fw-bold">價格: ${{ product.price }}</p>
+                                  {% with product.reservations.count as reservation_count %}
+                                      {% if reservation_count > 0 %}
+                                      <p class="card-text text-info small">
+                                          <i class="bi bi-calendar-check-fill"></i> {{ reservation_count }} 人預約
+                                      </p>
+                                      {% endif %}
+                                  {% endwith %}
+                                  <div class="mt-auto">
+                                      <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
+                                          <i class="bi bi-search"></i>查看詳情 & 預約者
+                                      </a>
+                                      <form action="{% url 'mark_as_sold' product.id %}" method="post" class="d-inline ms-2">
+                                          {% csrf_token %}
+                                          <button type="submit" class="btn btn-sm btn-outline-danger" title="標示為已售出" onclick="return confirm('確定要將此商品標示為已售出嗎？');">
+                                              <i class="bi bi-cart-x"></i> 售出
+                                          </button>
+                                      </form>
+                                  </div>
+                              </div>
+                          </div>
+                       </div>
+                      {% empty %}
+                          <p class="text-muted">您目前沒有刊登中的商品。 <a href="{% url 'sell' %}">前往上架</a></p>
+                      {% endfor %}
+                   </div>
+              </div>
+
+              {# 內容區塊 5: 我已售出的商品 #}
+              <div class="tab-pane fade" id="v-pills-sold-posts" role="tabpanel" aria-labelledby="v-pills-sold-posts-tab" tabindex="0">
+                  <h2 class="mb-4">我已售出的商品<i class="bi bi-cart-check-fill text-secondary"></i></h2>
+                   <div class="row g-4">
+                      {% for product in sold_posts %}
+                      <div class="col-md-6">
+                         <div class="card h-100 shadow-sm position-relative">
+                             <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 1; transform: rotate(-15deg);">已售出</span>
+                             <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 0; pointer-events: none;"></div>
+                              {% with img_to_display=product.get_first_image %}
+                                  {% if img_to_display and img_to_display.url %}
+                                      <img src="{{ img_to_display.url }}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
+                                  {% else %}
+                                      <img src="{% static 'images/logo.png' %}" class="card-img-top opacity-75" style="height: 200px; object-fit: cover;" alt="預設圖片">
+                                  {% endif %}
+                              {% endwith %}
+                              <div class="card-body d-flex flex-column">
+                                  <h5 class="card-title">{{ product.title }}</h5>
+                                  <p class="card-text text-muted text-decoration-line-through fw-bold">價格: ${{ product.price }}</p>
+                                  <div class="mt-auto">
+                                      <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
+                                          <i class="bi bi-search"></i> 查看詳情
+                                      </a>
+                                      {% if product.can_rate_buyer %}
+                                          <a href="{% url 'rate_buyer' product.id %}" class="btn btn-sm btn-outline-warning ms-2">
+                                              <i class="bi bi-star"></i> 評價買家
+                                          </a>
+                                      {% endif %}
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      {% empty %}
+                          <p class="text-muted">您還沒有已售出的商品記錄。</p>
+                      {% endfor %}
+                   </div>
+              </div>
+
+          </div> {# End tab-content #}
+      </div> {# End col-md-9 #}
+  </div> {# End row #}
+</div> {# End container #}
+    
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
 {% endblock %}
