@@ -442,16 +442,26 @@ def choose_buyer(request, product_id):
         buyer_id = request.POST.get('buyer_id')
         if buyer_id:
             try:
-                buyer = User.objects.get(id=buyer_id)
+                # 使用 CustomUser 模型來獲取買家對象
+                buyer = CustomUser.objects.get(id=buyer_id)
                 
                 # 標記商品為已售出
                 product.is_sold = True
-                product.buyer = buyer  # （假設 Post 有 buyer 欄位！）
+                product.buyer = buyer
                 product.save()
+
+                # 刪除該商品的所有預約紀錄
+                Reservation.objects.filter(product=product).delete()
+
+                # 建立通知給買家
+                Notification.objects.create(
+                    user=buyer,
+                    message=f"你預約的商品『{product.title}』已成功購買！"
+                )
 
                 messages.success(request, f"商品 '{product.title}' 已成功售出給 {buyer.username}！")
                 return redirect('profile')
-            except User.DoesNotExist:
+            except CustomUser.DoesNotExist:
                 messages.error(request, "所選的買家不存在。")
         else:
             messages.error(request, "請選擇一位買家。")
