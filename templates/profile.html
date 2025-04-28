@@ -250,11 +250,6 @@
                                       <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
                                           <i class="bi bi-search"></i> 查看詳情
                                       </a>
-                                      {% if product.can_rate_buyer %}
-                                          <a href="{% url 'rate_buyer' product.id %}" class="btn btn-sm btn-outline-warning ms-2">
-                                              <i class="bi bi-star"></i> 評價買家
-                                          </a>
-                                      {% endif %}
                                   </div>
                               </div>
                           </div>
