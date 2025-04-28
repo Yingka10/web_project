@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from mywebsite.views import homepage, api, register, login, profile, sell, product_detail, category_products, rate_seller, rate_buyer, seller_profile
+from mywebsite.views import homepage, api, register, login, profile, sell, product_detail, category_products, rate_seller, seller_profile
 from mywebsite import views
 from django.contrib.auth import views as auth_views
 
@@ -42,7 +42,6 @@ urlpatterns = [
     path('product/<int:product_id>/choose_buyer/', views.choose_buyer, name='choose_buyer'),
     path('notifications/', views.notification_list, name='notification_list'),
     path('rate_seller/<int:post_id>/', rate_seller, name='rate_seller'),
-    path('rate_buyer/<int:post_id>/', rate_buyer, name='rate_buyer'),
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:

@@ -3,10 +3,10 @@ from django.utils import timezone # 引入 timezone
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
-from mywebsite.models import Post, Category, Reservation , ProductImage, Rating, Notification, CustomUser, User
+from mywebsite.models import Post, Category, Reservation , ProductImage, Rating, Notification, CustomUser
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import  AuthenticationForm
 from django.contrib.auth import login as auth_login, authenticate
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -458,7 +458,11 @@ def choose_buyer(request, product_id):
                     user=buyer,
                     message=f"你預約的商品『{product.title}』已成功購買！"
                 )
-
+                # 建立通知給賣家
+                Notification.objects.create(
+                    user=product.owner,
+                    message=f"你的商品『{product.title}』已成功售出給 {buyer.username}！"
+                )
                 messages.success(request, f"商品 '{product.title}' 已成功售出給 {buyer.username}！")
                 return redirect('profile')
             except CustomUser.DoesNotExist:
@@ -496,26 +500,7 @@ def rate_seller(request, post_id):
     return render(request, "rate_seller.html", {'post': post, 'seller': seller})
 
 
-@login_required
-def rate_buyer(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    buyer = post.buyer
 
-    if request.method == 'POST':
-        score = request.POST.get('score')
-        comment = request.POST.get('comment')
-        if score:
-            try:
-                score = int(score)
-                Rating.objects.create(rater=request.user, rated=buyer, post=post, score=score, comment=comment)
-                messages.success(request, "評分成功！")
-                return redirect('profile')
-            except ValueError:
-                messages.error(request, "請選擇有效的評分。")
-        else:
-            messages.error(request, "請選擇評分。")
-
-    return render(request, "rate_buyer.html", {'post': post, 'buyer': buyer})
 
 def some_view(request):
     # 假設獲得了一個 buyer_id
