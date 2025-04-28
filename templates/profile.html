@@ -7,38 +7,38 @@
 
   <div class="row">
       {# 左側選單欄 #}
-      <div class="col-md-2 mb-4">
+      <div class="col-md-3 mb-4">
           {# 將標題和描述移到側邊欄的最上方 #}
-          <h1 class="mb-2 h4">個人頁面 - {{ user.username }}</h1> {# 可以調整標題大小，例如用 h4 #}
+          <h4 class="mb-2">個人頁面 - {{ user.username }}</h4> 
           <p class="text-muted mb-3">管理您的收藏和上架商品。</p>
 
           {# 按鈕選單 (使用 d-grid 和 gap-2) #}
           <div class="d-grid gap-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
               {# 選單項目 1: 我的收藏 (使用 btn 樣式) #}
-              <button class="btn btn-outline-primary text-start active" id="v-pills-favorites-tab" data-bs-toggle="pill" data-bs-target="#v-pills-favorites" type="button" role="tab" aria-controls="v-pills-favorites" aria-selected="true">
+              <button class="btn btn-lg btn-outline-primary text-start active" id="v-pills-favorites-tab" data-bs-toggle="pill" data-bs-target="#v-pills-favorites" type="button" role="tab" aria-controls="v-pills-favorites" aria-selected="true">
                   <i class="bi bi-bookmark-heart-fill text-danger me-2"></i>我的收藏
               </button>
               {# 選單項目 2: 我預約的商品 #}
-              <button class="btn btn-outline-primary text-start" id="v-pills-reservations-tab" data-bs-toggle="pill" data-bs-target="#v-pills-reservations" type="button" role="tab" aria-controls="v-pills-reservations" aria-selected="false">
+              <button class="btn btn-lg btn-outline-primary text-start" id="v-pills-reservations-tab" data-bs-toggle="pill" data-bs-target="#v-pills-reservations" type="button" role="tab" aria-controls="v-pills-reservations" aria-selected="false">
                   <i class="bi bi-calendar-check text-success me-2"></i>我預約的商品
               </button>
               {# 選單項目 3: 我購買的商品 #}
-               <button class="btn btn-outline-primary text-start" id="v-pills-purchased-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-purchased-posts" type="button" role="tab" aria-controls="v-pills-purchased-posts" aria-selected="false">
+               <button class="btn btn-lg btn-outline-primary text-start" id="v-pills-purchased-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-purchased-posts" type="button" role="tab" aria-controls="v-pills-purchased-posts" aria-selected="false">
                   <i class="bi bi-bag-check-fill text-success me-2"></i>我購買的商品
               </button>
               {# 選單項目 4: 我刊登中的商品 #}
-               <button class="btn btn-outline-primary text-start" id="v-pills-active-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-active-posts" type="button" role="tab" aria-controls="v-pills-active-posts" aria-selected="false">
+               <button class="btn btn-lg btn-outline-primary text-start" id="v-pills-active-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-active-posts" type="button" role="tab" aria-controls="v-pills-active-posts" aria-selected="false">
                   <i class="bi bi-tags-fill text-primary me-2"></i>我刊登中的商品
               </button>
                {# 選單項目 5: 我已售出的商品 #}
-              <button class="btn btn-outline-primary text-start" id="v-pills-sold-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-sold-posts" type="button" role="tab" aria-controls="v-pills-sold-posts" aria-selected="false">
+              <button class="btn btn-lg btn-outline-primary text-start" id="v-pills-sold-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-sold-posts" type="button" role="tab" aria-controls="v-pills-sold-posts" aria-selected="false">
                   <i class="bi bi-cart-check-fill text-secondary me-2"></i>我已售出的商品
               </button>
           </div>
       </div>
 
       {# 右側內容顯示區 #}
-      <div class="col-md-10">
+      <div class="col-md-9">
 
           <div class="tab-content" id="v-pills-tabContent">
 
@@ -164,6 +164,13 @@
                                       <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a>
                                   </p>
                                   {% endif %}
+
+                                  {% if product.purchase_time %}
+                                  <p class="card-text small text-muted">
+                                      <i class="bi bi-calendar-check"></i> 購買時間: {{ product.purchase_time|date:"Y/m/d H:i" }}
+                                  </p>
+                                  {% endif %}
+
                                   <div class="mt-auto">
                                       <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
                                           <i class="bi bi-search"></i> 查看詳情

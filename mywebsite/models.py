@@ -77,6 +77,7 @@ class Post(models.Model):
     is_reserved = models.BooleanField("已被預約", default=False)
     is_sold = models.BooleanField("已售出", default=False)
     is_selected = models.BooleanField(default=False)
+    purchase_time = models.DateTimeField("購買時間", null=True, blank=True)
 
     class Meta:
         ordering = ('-pub_date',)

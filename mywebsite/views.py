@@ -449,6 +449,7 @@ def choose_buyer(request, product_id):
                 # 標記商品為已售出
                 product.is_sold = True
                 product.buyer = buyer
+                product.purchase_time = timezone.now()
                 product.save()
 
                 # 刪除該商品的所有預約紀錄
