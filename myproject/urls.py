@@ -42,6 +42,7 @@ urlpatterns = [
     path('product/<int:product_id>/choose_buyer/', views.choose_buyer, name='choose_buyer'),
     path('notifications/', views.notification_list, name='notification_list'),
     path('rate_seller/<int:post_id>/', rate_seller, name='rate_seller'),
+    path('chat/<int:seller_id>/<int:product_id>/', views.chat_with_seller, name='chat_with_seller'),
 ]
 # 僅在開發環境中添加 media URL
 if settings.DEBUG:

@@ -15,8 +15,41 @@ import cloudinary
 from django.conf import settings
 from django.contrib.auth.models import User
 from .form import CustomUserCreationForm
+from .models import ChatMessage 
+from django.views.decorators.http import require_http_methods
 
+@require_http_methods(["GET", "POST"])
+def chat_with_seller(request, seller_id, product_id):
+    if request.method == "POST":
+        message_content = request.POST.get("message")
+        if message_content:
+            # 儲存新訊息到資料庫，這裡假設你有 sender 欄位
+            ChatMessage.objects.create(
+                sender=request.user.username if request.user.is_authenticated else "Guest",
+                content=message_content,
+                seller_id=seller_id,
+                product_id=product_id,
+            )
+        # 重定向到同一個網址，防止重複提交
+        return redirect('chat_with_seller', seller_id=seller_id, product_id=product_id)
 
+    # 取得與該賣家、商品有關的聊天訊息
+    messages = ChatMessage.objects.filter(seller_id=seller_id, product_id=product_id)
+    context = {
+        'seller_id': seller_id,
+        'product_id': product_id,
+        'messages': messages,
+    }
+    return render(request, 'chat/chat_with_seller.html', context)
+
+def chat_with_seller(request, seller_id, product_id):
+    # 根據 seller_id 與 product_id 做相應邏輯處理，例如取得聊天記錄或建立新的聊天室
+    context = {
+        'seller_id': seller_id,
+        'product_id': product_id,
+        # 其他資料...
+    }
+    return render(request, 'chat/chat_with_seller.html', context)
 
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],

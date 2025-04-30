@@ -105,3 +105,5 @@ your_project/
 ### 啟動時出現 `SECRET_KEY` 錯誤？
 - 檢查 `.env` 是否有填入 `SECRET_KEY`
 - `settings.py` 是否有正確讀取環境變數
+
+python -m daphne myproject.asgi:application

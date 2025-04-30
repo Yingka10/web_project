@@ -39,7 +39,19 @@ INSTALLED_APPS = [
     'mywebsite',
     'cloudinary',
     'cloudinary_storage',
+    'chat',
+    'channels',
 ]
+
+# 指定 ASGI Application
+ASGI_APPLICATION = 'myproject.asgi.application'
+
+# 設定 Channels layer，建議使用 Redis 作後台
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

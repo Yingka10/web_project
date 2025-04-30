@@ -5,6 +5,16 @@ from django.utils import timezone
 from django.db.models import Avg
 from django.conf import settings
 
+class ChatMessage(models.Model):
+    sender = models.CharField(max_length=150)
+    content = models.TextField()
+    seller_id = models.IntegerField()
+    product_id = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender}: {self.content[:20]}"
+    
 class Category(models.Model):
     name = models.CharField("分類名稱", max_length=100, unique=True)
     description = models.TextField("描述", blank=True, null=True)

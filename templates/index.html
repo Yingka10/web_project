@@ -137,15 +137,21 @@
                     <div class="mt-auto d-flex justify-content-between align-items-center">
                         <span class="text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">${{ product.price }}</span>
 
-                        {# 收藏愛心按鈕 #}
+                        {# 將收藏與聊天按鈕放在同一區塊中，保持同一行排列 #}
                         {% if user.is_authenticated and user != product.owner and not product.is_sold %}
-                        <div style="z-index: 10; position: relative;">
+                        <div class="d-flex align-items-center" style="z-index: 10; position: relative;">
+
+                            {# 收藏愛心按鈕 #}
                             <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation();"> {# onclick 防止點擊愛心觸發卡片連結 #}
                                 {% if user in product.favorites.all %}
                                     <i class="bi bi-heart-fill text-danger fs-5"></i>
                                 {% else %}
                                     <i class="bi bi-heart text-danger fs-5"></i>
                                 {% endif %}
+                            </a>
+                            {# 聊天按鈕，點擊後導向與賣家聊天頁面 (假設 'chat_with_seller' URL 需要賣家與商品ID) #}
+                            <a href="{% url 'chat_with_seller' seller_id=product.owner.id product_id=product.id %}" class="text-decoration-none" onclick="event.stopPropagation();">
+                              <i class="bi bi-chat fs-5 text-info"></i>
                             </a>
                         </div>
                         {% endif %}

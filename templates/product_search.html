@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}搜尋結果 - {{ query }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1>搜尋結果：{{ query }}</h1>
+  <p>共有 {{ results.count }} 筆相關商品</p>
+  
+  <div class="row">
+    {% for post in results %}
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          {% if post.image %}
+            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+          {% else %}
+            <img src="{% static 'images/default.jpg' %}" class="card-img-top" alt="預設圖片">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">
+              <a href="{% url 'product_detail' post.id %}" class="text-decoration-none text-dark">
+                {{ post.title }}
+              </a>
+            </h5>
+            <p class="card-text text-truncate">{{ post.body|truncatechars:100 }}</p>
+            <p class="card-text text-primary">價格：${{ post.price }}</p>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-muted">找不到相關商品。</p>
+    {% endfor %}
+  </div>
+  <a href="{% url 'index' %}" class="btn btn-secondary">回首頁</a>
+</div>
+{% endblock %}
