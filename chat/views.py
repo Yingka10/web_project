@@ -54,11 +54,23 @@ def chat_detail(request, conversation_id):
     # 確認只有對話雙方可以進入
     if request.user != conversation.buyer and request.user != conversation.seller:
         return redirect('home')  # 或返回 403
+
+    if request.method == "POST":
+        content = request.POST.get('message')
+        if content:
+            # 假設 Message 模型至少需要 conversation, sender, content 等欄位
+            Message.objects.create(
+                conversation=conversation,
+                sender=request.user,
+                content=content,
+            )
+            # 送出訊息後使用 Post-Redirect-Get 模式，重新導向同一頁以防止重複提交
+            return redirect('chat_detail', conversation_id=conversation.id)
     
-    messages = conversation.messages.all().order_by('timestamp')
+    messages_qs = conversation.messages.all().order_by('timestamp')
     return render(request, 'chat/chat_detail.html', {
         'conversation': conversation,
-        'messages': messages,
+        'messages': messages_qs,
     })
 
 @login_required

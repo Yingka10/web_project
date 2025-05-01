@@ -44,14 +44,14 @@
     <div id="chat-box" class="chat-box">
       <!-- 現有訊息可由伺服器渲染，也可以僅靠 WebSocket 即時加入 -->
       {% for message in messages %}
-        {% if message.sender == request.user.username %}
+        {% if message.sender.username == request.user.username %}
           <div class="message right">
-            <strong>{{ message.sender }}:</strong><br>
+            <strong>{{ message.sender.username }}:</strong><br>
             {{ message.content }}
           </div>
         {% else %}
           <div class="message left">
-            <strong>{{ message.sender }}:</strong><br>
+            <strong>{{ message.sender.username }}:</strong><br>
             {{ message.content }}
           </div>
         {% endif %}
@@ -71,8 +71,9 @@
   <script>
     // 組合一個聊天室名稱（例如：seller_id_product_id）
     const roomName = '{{ seller_id }}_{{ product_id }}';
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const chatSocket = new WebSocket(
-      'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+      protocol + window.location.host + '/ws/chat/' + roomName + '/'
     );
 
     // 當連線成功建立時
@@ -104,6 +105,9 @@
     };
     
     // 建立連線錯誤或連線關閉時的處理
+    chatSocket.onerror = function(e) {
+      console.error('WebSocket 連線錯誤:', e);
+    };
     chatSocket.onclose = function(e) {
       console.error('聊天室連線意外中斷');
     };

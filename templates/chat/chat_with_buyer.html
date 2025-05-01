@@ -11,8 +11,8 @@
     </div>
     <div class="card-body" id="messages-area">
       {% for message in messages %}
-        <div class="message {% if message.sender == request.user.username %}my-message{% else %}other-message{% endif %}">
-          <p><strong>{{ message.sender }}</strong>: {{ message.content }}</p>
+        <div class="message {% if message.sender.username == request.user.username %}my-message{% else %}other-message{% endif %}">
+          <p><strong>{{ message.sender.username }}</strong>: {{ message.content }}</p>
           <div class="timestamp">{{ message.created_at|date:"Y-m-d H:i" }}</div>
         </div>
       {% empty %}
@@ -20,7 +20,7 @@
       {% endfor %}
     </div>
     <div class="card-footer">
-      <form action="" method="post">
+      <form id="chat-form" action="" method="post">
         {% csrf_token %}
         <div class="input-group">
           <input type="text" name="message" class="form-control" placeholder="輸入訊息" required>
@@ -30,4 +30,63 @@
     </div>
   </div>
 </div>
+
+<script>
+  // 組合一個聊天室名稱（例如：buyer_id_product_id）
+  const roomName = '{{ buyer.id }}_{{ product.id }}';
+  const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+  const chatSocket = new WebSocket(
+    protocol + window.location.host + '/ws/chat/' + roomName + '/'
+  );
+
+  // 當連線成功建立時
+  chatSocket.onopen = function(e) {
+    console.log('WebSocket 連線已建立');
+  };
+
+  // 當收到訊息時，更新聊天框內容
+  chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    const message = data['message'];
+    const sender = data['sender'];
+    const messagesArea = document.getElementById('messages-area');
+
+    // 建立新的訊息區塊
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    messageDiv.classList.add(sender === '{{ request.user.username }}' ? 'my-message' : 'other-message');
+    messageDiv.innerHTML = `<p><strong>${sender}</strong>: ${message}</p><div class="timestamp">${new Date().toLocaleString()}</div>`;
+    messagesArea.appendChild(messageDiv);
+    // 自動捲到最底部
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+  };
+
+  // 建立連線錯誤或連線關閉時的處理
+  chatSocket.onerror = function(e) {
+    console.error('WebSocket 連線錯誤:', e);
+  };
+  chatSocket.onclose = function(e) {
+    console.error('聊天室連線意外中斷');
+  };
+
+  // 發送訊息
+  document.getElementById('chat-form').onsubmit = function(e) {
+    e.preventDefault();
+    const messageInput = document.querySelector('#chat-form input[name="message"]');
+    const message = messageInput.value;
+    if (message.trim() === '') {
+      return;
+    }
+    // 確認 WebSocket 連線狀態是否處於開啟狀態
+    if (chatSocket.readyState === WebSocket.OPEN) {
+      chatSocket.send(JSON.stringify({
+        'message': message,
+        'sender': '{{ request.user.username }}'
+      }));
+      messageInput.value = '';
+    } else {
+      console.error('WebSocket 連線尚未開啟或已關閉');
+    }
+  };
+</script>
 {% endblock %}
