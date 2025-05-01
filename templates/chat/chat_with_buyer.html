@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}聊天室{% endblock %}
+
+{% block content %}
+<div class="container" id="chat-container">
+  <h2 class="mb-4">聊天室</h2>
+  <div class="card">
+    <div class="card-header">
+      對話：{{ buyer.username }} 與 {{ seller.username }}
+    </div>
+    <div class="card-body" id="messages-area">
+      {% for message in messages %}
+        <div class="message {% if message.sender == request.user.username %}my-message{% else %}other-message{% endif %}">
+          <p><strong>{{ message.sender }}</strong>: {{ message.content }}</p>
+          <div class="timestamp">{{ message.created_at|date:"Y-m-d H:i" }}</div>
+        </div>
+      {% empty %}
+        <p>目前沒有訊息</p>
+      {% endfor %}
+    </div>
+    <div class="card-footer">
+      <form action="" method="post">
+        {% csrf_token %}
+        <div class="input-group">
+          <input type="text" name="message" class="form-control" placeholder="輸入訊息" required>
+          <button class="btn btn-primary" type="submit">送出</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

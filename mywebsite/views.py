@@ -51,6 +51,15 @@ def chat_with_seller(request, seller_id, product_id):
     }
     return render(request, 'chat/chat_with_seller.html', context)
 
+def chat_with_buyer(request, buyer_id, product_id):
+    # 根據 buyer_id 與 product_id 做相應邏輯處理，例如取得聊天記錄或建立新的聊天室
+    context = {
+        'buyer_id': buyer_id,
+        'product_id': product_id,
+        # 其他資料...
+    }
+    return render(request, 'chat/chat_with_buyer.html', context)
+
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
     api_key=settings.CLOUDINARY_STORAGE['API_KEY'],
