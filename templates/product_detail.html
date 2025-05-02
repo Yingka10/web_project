@@ -173,7 +173,7 @@
                                 <div class="text-muted small">預約時間：{{ reservation.reserved_at|date:"Y/m/d H:i" }}</div>
                             </div>
                             <div class="d-flex align-items-center">
-                                <a href="{% url 'chat_with_buyer' reservation.user.id product.id %}" class="btn btn-outline-secondary btn-sm me-2">
+                                <a href="{% url 'chat' role='buyer' chat_with_id=product.owner.id product_id=product.id %}" class="btn btn-outline-secondary btn-sm me-2">
                                     <i class="bi bi-chat-dots"></i> 訊息
                                 </a>
                                 <div class="form-check mb-0">

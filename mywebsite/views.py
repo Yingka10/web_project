@@ -16,49 +16,49 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from .form import CustomUserCreationForm
 from .models import ChatMessage 
-from django.views.decorators.http import require_http_methods
 
-@require_http_methods(["GET", "POST"])
-def chat_with_seller(request, seller_id, product_id):
+
+@login_required
+def chat(request, role, chat_with_id, product_id):
+    chat_with = get_object_or_404(User, id=chat_with_id)
+    
+    # 根據角色決定對話中賣家的 id
+    if role == 'seller':
+        # 當前使用者為賣家，對話對象為買家，但訊息記錄只以 seller_id 標識
+        actual_seller_id = request.user.id
+    elif role == 'buyer':
+        # 當前使用者為買家，對話對象為賣家
+        actual_seller_id = chat_with.id
+    else:
+        messages.error(request, "不合法的聊天室參數。")
+        return redirect('homepage')
+    
     if request.method == "POST":
         message_content = request.POST.get("message")
         if message_content:
-            # 儲存新訊息到資料庫，這裡假設你有 sender 欄位
             ChatMessage.objects.create(
                 sender=request.user.username if request.user.is_authenticated else "Guest",
                 content=message_content,
-                seller_id=seller_id,
                 product_id=product_id,
+                seller_id=actual_seller_id,
             )
-        # 重定向到同一個網址，防止重複提交
-        return redirect('chat_with_seller', seller_id=seller_id, product_id=product_id)
+        # 重導回相同聊天室，同時傳回 role 參數
+        return redirect('chat', role=role, chat_with_id=chat_with_id, product_id=product_id)
+    
+    # 使用 product_id 與 seller_id 來過濾聊天記錄
+    messages_qs = ChatMessage.objects.filter(
+        product_id=product_id,
+        seller_id=actual_seller_id
+    ).order_by('id')
 
-    # 取得與該賣家、商品有關的聊天訊息
-    messages = ChatMessage.objects.filter(seller_id=seller_id, product_id=product_id)
     context = {
-        'seller_id': seller_id,
+        'user_role': role,
+        'chat_with': chat_with,
+        'seller_id': actual_seller_id,
         'product_id': product_id,
-        'messages': messages,
+        'messages': messages_qs,
     }
-    return render(request, 'chat/chat_with_seller.html', context)
-
-def chat_with_seller(request, seller_id, product_id):
-    # 根據 seller_id 與 product_id 做相應邏輯處理，例如取得聊天記錄或建立新的聊天室
-    context = {
-        'seller_id': seller_id,
-        'product_id': product_id,
-        # 其他資料...
-    }
-    return render(request, 'chat/chat_with_seller.html', context)
-
-def chat_with_buyer(request, buyer_id, product_id):
-    # 根據 buyer_id 與 product_id 做相應邏輯處理，例如取得聊天記錄或建立新的聊天室
-    context = {
-        'buyer_id': buyer_id,
-        'product_id': product_id,
-        # 其他資料...
-    }
-    return render(request, 'chat/chat_with_buyer.html', context)
+    return render(request, 'chat.html', context)
 
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],

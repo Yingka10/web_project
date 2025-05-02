@@ -48,8 +48,11 @@ ASGI_APPLICATION = 'myproject.asgi.application'
 
 # 設定 Channels layer，建議使用 Redis 作後台
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+     "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     },
 }
 

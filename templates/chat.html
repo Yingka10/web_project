@@ -69,8 +69,11 @@
   </div>
 
   <script>
-    // 組合一個聊天室名稱（例如：seller_id_product_id）
-    const roomName = '{{ seller_id }}_{{ product_id }}';
+    // 這裡假設房間名稱是根據使用者角色和對話對象決定的
+    // 例如: chat_seller_{{ chat_with.id }} 或 chat_buyer_{{ chat_with.id }}
+    const roomName = ('{{ user_role }}' === 'seller')
+                    ? 'chat_seller_{{ chat_with.id }}'
+                    : 'chat_buyer_{{ chat_with.id }}';
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const chatSocket = new WebSocket(
       protocol + window.location.host + '/ws/chat/' + roomName + '/'
@@ -91,6 +94,7 @@
       // 建立新的訊息區塊
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message');
+
       // 判斷發送者決定顯示在左或右
       if (sender === '{{ request.user.username }}') {
         messageDiv.classList.add('right');
@@ -100,6 +104,7 @@
 
       messageDiv.innerHTML = '<strong>' + sender + ':</strong><br>' + message;
       chatBox.appendChild(messageDiv);
+      
       // 自動捲到最底部
       chatBox.scrollTop = chatBox.scrollHeight;
     };

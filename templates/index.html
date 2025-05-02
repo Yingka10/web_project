@@ -150,7 +150,7 @@
                                 {% endif %}
                             </a>
                             {# 聊天按鈕，點擊後導向與賣家聊天頁面 (假設 'chat_with_seller' URL 需要賣家與商品ID) #}
-                            <a href="{% url 'chat_with_seller' seller_id=product.owner.id product_id=product.id %}" class="text-decoration-none" onclick="event.stopPropagation();">
+                            <a href="{% url 'chat' role='buyer' chat_with_id=product.owner.id product_id=product.id %}" class="text-decoration-none" onclick="event.stopPropagation();">
                               <i class="bi bi-chat fs-5 text-info"></i>
                             </a>
                         </div>
