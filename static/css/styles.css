@@ -94,15 +94,27 @@ body {
 
 .btn-outline-primary {
   color: #000000; 
-  border-color: #ec6c17; 
+  border-color: #e56611; 
   font-size: 20px;
   width: 200px;
 }
 
 .btn-outline-primary:hover {
-  background-color: #ec6c17; 
+  background-color: #e56611; 
   color: #fff; 
-  border-color: #ec6c17; 
+  border-color: #e56611; 
+}
+
+.btn-outline-primary.active {
+  background-color: transparent;
+  color: #e56611;
+  border-color: #e56611;
+}
+
+.btn-outline-primary:active {
+  background-color: #e56611 !important;
+  border-color: #e56611 !important;
+  transition: all 0.1s ease;
 }
 
 /* 商品卡片 */
