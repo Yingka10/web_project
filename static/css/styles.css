@@ -31,12 +31,12 @@ body {
 }
 
 .btn-outline-success {
-  color: #0d3f30; 
+  color: #092a20; 
   background-color: #cde0d4; 
   border-color: #cde0d4;
 }
 .btn-outline-success:hover {
-  color: #0d3f30; 
+  color: #08271e; 
   background-color: #aad0b7; 
   border-color: #aad0b7; 
 }
@@ -51,7 +51,6 @@ body {
   border-color: #c1402f;
 }
 .form-control {
-  background-color: #f8f3e0;
   color: #2e3236; 
 }
 .notification-icon {
@@ -93,6 +92,19 @@ body {
   text-shadow: 1px 1px 3px #000;
 }
 
+.btn-outline-primary {
+  color: #000000; 
+  border-color: #ec6c17; 
+  font-size: 20px;
+  width: 200px;
+}
+
+.btn-outline-primary:hover {
+  background-color: #ec6c17; 
+  color: #fff; 
+  border-color: #ec6c17; 
+}
+
 /* 商品卡片 */
 .product-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -112,8 +124,7 @@ body {
   margin-bottom: 0.75rem;
 }
 
-/* Footer 區塊 */
 footer {
-  background: #fff;
-  border-top: 1px solid #dee2e6;
+  background: #399e9c;
+  color: #fff
 }

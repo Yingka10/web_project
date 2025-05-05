@@ -63,12 +63,12 @@
                 {% endif %}
             </a>
         </div>
-
+        
+        <a href="{% url 'profile' %}" class="btn btn-outline-dark ms-2">個人頁面</a>
         <form action="{% url 'logout' %}" method="post" class="ms-2 d-inline">
             {% csrf_token %}
             <button type="submit" class="btn btn-outline-danger">登出</button>
         </form>
-        <a href="{% url 'profile' %}" class="btn btn-outline-dark ms-2">個人頁面</a>
         <a href="{% url 'sell' %}" class="btn btn-warning ms-2">出售</a>
     {% else %}
         <a href="{% url 'login' %}" class="btn btn-primary me-2">登入</a>
@@ -100,7 +100,7 @@
     </main>
 
     <!-- 頁腳 -->
-    <footer class="py-4 mt-5 bg-light border-top">
+    <footer class="py-4 mt-5 border-top">
         <div class="container text-center">
             <p class="mb-0">© 2025 中大二手・再續錢緣. All rights reserved.</p>
         </div>

@@ -53,8 +53,8 @@
                 {% if user.is_authenticated %}
                   <form action="{% url 'logout' %}" method="post" style="display: inline;" class="ms-2">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger">登出</button>
                     <a href="{% url 'profile' %}" class="btn btn-outline-dark ms-2">個人頁面</a>
+                    <button type="submit" class="btn btn-outline-danger">登出</button>
                     <a href="{% url 'sell' %}" class="btn btn-warning ms-2">出售</a> 
                     
                   </form>
