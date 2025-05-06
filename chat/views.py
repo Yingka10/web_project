@@ -61,14 +61,14 @@ def chat_detail(request, conversation_id):
             # 假設 Message 模型至少需要 conversation, sender, content 等欄位
             Message.objects.create(
                 conversation=conversation,
-                sender=request.user,
+                sender=request.user.username,
                 content=content,
             )
             # 送出訊息後使用 Post-Redirect-Get 模式，重新導向同一頁以防止重複提交
             return redirect('chat_detail', conversation_id=conversation.id)
     
     messages_qs = conversation.messages.all().order_by('timestamp')
-    return render(request, 'chat/chat_detail.html', {
+    return render(request, 'chat.html', {
         'conversation': conversation,
         'messages': messages_qs,
     })

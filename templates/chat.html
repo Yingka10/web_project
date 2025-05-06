@@ -44,20 +44,20 @@
     <div id="chat-box" class="chat-box">
       <!-- 現有訊息可由伺服器渲染，也可以僅靠 WebSocket 即時加入 -->
       {% for message in messages %}
-        {% if message.sender.username == request.user.username %}
-          <div class="message right">
-            <strong>{{ message.sender.username }}:</strong><br>
-            {{ message.content }}
-          </div>
-        {% else %}
-          <div class="message left">
-            <strong>{{ message.sender.username }}:</strong><br>
-            {{ message.content }}
-          </div>
-        {% endif %}
-      {% empty %}
-        <p>尚無訊息</p>
-      {% endfor %}
+      {% if message.sender == request.user.username %}
+        <div class="message right">
+          <strong>{{ message.sender }}:</strong><br>
+          {{ message.content }}
+        </div>
+      {% else %}
+        <div class="message left">
+          <strong>{{ message.sender }}:</strong><br>
+          {{ message.content }}
+        </div>
+      {% endif %}
+    {% empty %}
+      <p>尚無訊息</p>
+    {% endfor %}
     </div>
 
     <!-- 輸入訊息表單 -->
@@ -129,7 +129,9 @@
       if (chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify({
           'message': message,
-          'sender': '{{ request.user.username }}'
+          'sender': '{{ request.user.username }}',
+          'seller_id': '{{ seller_id }}',
+          'product_id': '{{ product_id }}'
         }));
         messageInputDom.value = '';
       } else {

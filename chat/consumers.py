@@ -1,6 +1,8 @@
-# mywebsite/consumers.py
+# chat/consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from mywebsite.models import ChatMessage
+from channels.db import database_sync_to_async
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -27,6 +29,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message = data.get('message')
         sender = data.get('sender')
+        seller_id = data.get('seller_id')
+        product_id = data.get('product_id')
+
+        # 保存訊息到資料庫
+        await self.save_message(sender, message, seller_id, product_id)
 
         # 廣播訊息到聊天室群組
         await self.channel_layer.group_send(
@@ -47,3 +54,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': message,
             'sender': sender,
         }))
+
+    # 藉由同步函式保存訊息
+    @database_sync_to_async
+    def save_message(self, sender, message, seller_id, product_id):
+        ChatMessage.objects.create(
+            sender=sender,
+            content=message,
+            seller_id=seller_id,
+            product_id=product_id,
+        )
