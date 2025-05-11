@@ -40,10 +40,21 @@
                             </select>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="images" class="form-label">商品圖片 (可多選):</label>
-                            <input type="file" class="form-control" id="images" name="images" accept="image/*" required multiple>
-                            <div id="imageHelp" class="form-text text-muted small">請上傳至少一張清晰的商品圖片。</div>
+                        <div class="mb-3">
+                            <label class="form-label">商品圖片:</label>
+                            <div id="image-inputs-container">
+                                <div class="input-group mb-2">
+                                    <input type="file" class="form-control" name="images" accept="image/*" required>
+                                    <button type="button" class="btn btn-outline-danger" disabled style="visibility: hidden;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-image-btn" class="btn btn-outline-secondary btn-sm mt-1">
+                                <i class="bi bi-plus-circle"></i> 新增其他圖片
+                            </button>
+                            <div id="imageHelp" class="form-text text-muted small">請至少上傳一張清晰的商品圖片。</div>
+                        </div>
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">確認上架</button> 
@@ -56,4 +67,51 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInputsContainer = document.getElementById('image-inputs-container');
+        const addImageBtn = document.getElementById('add-image-btn');
+        let imageUploadCount = 1;
+        const maxImages = 10;
+    
+        if (addImageBtn) {
+            addImageBtn.addEventListener('click', function() {
+                if (imageUploadCount >= maxImages) {
+                    alert('最多只能上傳 ' + maxImages + ' 張圖片。');
+                    return;
+                }
+    
+                imageUploadCount++;
+    
+                const newImageInputDiv = document.createElement('div');
+                newImageInputDiv.classList.add('input-group', 'mb-2');
+    
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.name = 'images';
+                newInput.accept = 'image/*';
+                newInput.classList.add('form-control');
+    
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.classList.add('btn', 'btn-outline-danger');
+                removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
+                removeBtn.addEventListener('click', function() {
+                    newImageInputDiv.remove();
+                    imageUploadCount--;;
+                    const firstInput = imageInputsContainer.querySelector('input[type="file"]');
+                    if (firstInput && imageInputsContainer.children.length === 1) {
+                        firstInput.required = true;
+                    }
+    
+                });
+    
+                newImageInputDiv.appendChild(newInput);
+                newImageInputDiv.appendChild(removeBtn);
+                imageInputsContainer.appendChild(newImageInputDiv);
+            });
+        }
+    });
+</script>
 {% endblock %}
