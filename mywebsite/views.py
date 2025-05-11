@@ -518,6 +518,7 @@ def choose_buyer(request, product_id):
 
 @login_required
 def notification_list(request):
+    request.user.notifications.filter(is_read=False).update(is_read=True)
     notifications = request.user.notifications.order_by('-created_at')
     return render(request, 'notification_list.html', {  # 這裡改成 'notification_list.html'
         'notifications': notifications,
