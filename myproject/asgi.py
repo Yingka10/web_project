@@ -16,7 +16,7 @@ django.setup()  # 明確啟動 Django，載入 apps
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-import chat.routing
+import chat.routing 
 
 
 application = ProtocolTypeRouter({

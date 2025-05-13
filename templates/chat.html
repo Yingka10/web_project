@@ -38,8 +38,15 @@
 </head>
 <body>
   <div class="chat-container">
-    <h1>Chat with Seller</h1>
-    <p>Seller ID: {{ seller_id }}, Product ID: {{ product_id }}</p>
+    <h1>聊天室</h1>
+    {% if conversation.user1.id == request.user.id %}
+      <p>聊天對象：{{ conversation.user2.username }}</p>
+    {% else %}
+      <p>聊天對象：{{ conversation.user1.username }}</p>
+    {% endif %}
+
+    <!-- 顯示對話 ID 來確認 -->
+    <p>對話 ID:{{ conversation.id }}</p>
 
     <div id="chat-box" class="chat-box">
       <!-- 現有訊息可由伺服器渲染，也可以僅靠 WebSocket 即時加入 -->
@@ -69,15 +76,23 @@
   </div>
 
   <script>
-    // 這裡假設房間名稱是根據使用者角色和對話對象決定的
-    // 例如: chat_seller_{{ chat_with.id }} 或 chat_buyer_{{ chat_with.id }}
-    const roomName = ('{{ user_role }}' === 'seller')
-                    ? 'chat_seller_{{ chat_with.id }}'
-                    : 'chat_buyer_{{ chat_with.id }}';
+  
+    // 根據使用者角色決定房間名稱前綴
+    const roomPrefix = "{% if conversation.user1.id == request.user.id %}chat_buyer{% else %}chat_seller{% endif %}";
+    const roomID = "{{ conversation.id }}";
+    const roomName = roomPrefix + '_' + roomID;
+
+    // 利用 console.log 印出 roomID，方便在瀏覽器中檢查它是否正確
+    console.log("Generated roomID:", roomID);
+
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const chatSocket = new WebSocket(
-      protocol + window.location.host + '/ws/chat/' + roomName + '/'
-    );
+    const socketUrl = protocol + window.location.host + '/ws/chat/' + roomID + '/';
+  
+
+    // 用 console.log 檢查生成的 URL
+    console.log('Socket URL:', socketUrl);
+
+    const chatSocket = new WebSocket(socketUrl);
 
     // 當連線成功建立時
     chatSocket.onopen = function(e) {
@@ -129,9 +144,7 @@
       if (chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify({
           'message': message,
-          'sender': '{{ request.user.username }}',
-          'seller_id': '{{ seller_id }}',
-          'product_id': '{{ product_id }}'
+          'sender': "{{ request.user.username }}"
         }));
         messageInputDom.value = '';
       } else {

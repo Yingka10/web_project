@@ -2,12 +2,14 @@
 
 import django.db.models.deletion
 from django.db import migrations, models
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ("mywebsite", "0015_alter_customuser_groups_and_more"),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
@@ -19,7 +21,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="purchased_posts",
-                to="mywebsite.customuser",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AlterField(
@@ -28,7 +30,7 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 related_name="favorite_posts",
-                to="mywebsite.customuser",
+                to=settings.AUTH_USER_MODEL,
                 verbose_name="收藏的使用者",
             ),
         ),
@@ -40,7 +42,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="posts",
-                to="mywebsite.customuser",
+                to=settings.AUTH_USER_MODEL,
                 verbose_name="賣家",
             ),
         ),
@@ -50,7 +52,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="received_ratings",
-                to="mywebsite.customuser",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AlterField(
@@ -59,7 +61,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="given_ratings",
-                to="mywebsite.customuser",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
     ]

@@ -1,37 +1,38 @@
+# chat/models.py
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
-# 假設 Post 模型在 shop 應用內，如果不同請修改 import 路徑
-from mywebsite.models import Post
+#from mywebsite.models import Post
 
 class Conversation(models.Model):
-    buyer = models.ForeignKey(
+   
+    user1 = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
-        related_name='buyer_conversations',
-        verbose_name="買家"
+        related_name='conversation_user1',
+        db_column='buyer_id'
     )
-    seller = models.ForeignKey(
+    user2 = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
-        related_name='seller_conversations',
-        verbose_name="賣家"
-    )
-    post = models.ForeignKey(
-        Post, 
-        on_delete=models.CASCADE, 
-        related_name='conversations',
-        verbose_name="商品"
+        related_name='conversation_user2',
+        db_column='seller_id'
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="建立時間")
+
+    def save(self, *args, **kwargs):
+        # 自動依使用者 ID 排序，較小的放在 user1
+        if self.user1.id > self.user2.id:
+            self.user1, self.user2 = self.user2, self.user1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "對話"
         verbose_name_plural = "對話紀錄"
         ordering = ['-created_at']
+        unique_together = (("user1", "user2"),)
 
     def __str__(self):
-        return f"{self.buyer.username} 與 {self.seller.username} - {self.post.title}"
+        return f"{self.user1.username} 與 {self.user2.username}"
 
 
 class Message(models.Model):

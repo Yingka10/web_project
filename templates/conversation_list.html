@@ -1,0 +1,14 @@
+<!-- conversations_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>你的對話</h2>
+  {% for conversation in conversations %}
+    <div class="conversation-item">
+      <p>對話編號：{{ conversation.id }}</p>
+      <a href="{% url 'chat_detail' conversation.id %}">進入聊天室</a>
+    </div>
+  {% empty %}
+    <p>目前無對話。</p>
+  {% endfor %}
+{% endblock %}
