@@ -27,8 +27,14 @@ DEBUG = True
 
 if os.environ.get('RENDER'):
     ALLOWED_HOSTS = ['.onrender.com']
+    CSRF_TRUSTED_ORIGINS = ['https://你的 render 網址']
+elif os.environ.get('RAILWAY'):
+    ALLOWED_HOSTS = ['webproject-ncu.up.railway.app']
+    CSRF_TRUSTED_ORIGINS = ['https://webproject-ncu.up.railway.app']
 else:
-    ALLOWED_HOSTS = ['*']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1']
+
 
 
 # Application definition
