@@ -56,7 +56,9 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [redis_url],
+            "hosts": [(url.hostname, url.port)],  # 用正確的 URL 主機名與端口
+            "password": url.password,  # 如果有密碼
+            "ssl": True,  # 若使用加密連線
         },
     },
 }
