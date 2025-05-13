@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'onrenday.com', 'webproject-ncu.up.railway.app']
+ALLOWED_HOSTS = ['localhost', 'onrenday.com', 'ncu-second-hand.onrender.com' ,'webproject-ncu.up.railway.app']
 
 
 # Application definition
