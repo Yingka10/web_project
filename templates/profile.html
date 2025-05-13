@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 {% block title %}個人頁面{% endblock %}
 
 {% block content %}
@@ -17,6 +18,10 @@
               {# 選單項目 1: 我的收藏 (使用 btn 樣式) #}
               <button class="btn btn-mg btn-outline-primary text-start" id="v-pills-favorites-tab" data-bs-toggle="pill" data-bs-target="#v-pills-favorites" type="button" role="tab" aria-controls="v-pills-favorites" aria-selected="true">
                   <i class="bi bi-bookmark-heart-fill text-danger me-2"></i>我的收藏
+              </button>
+              {# 新增：選單項目 - 我的聊天室 #}
+              <button class="btn btn-mg btn-outline-primary text-start" id="v-pills-conversations-tab" data-bs-toggle="pill" data-bs-target="#v-pills-conversations" type="button" role="tab" aria-controls="v-pills-conversations" aria-selected="false">
+                  <i class="bi bi-chat-dots-fill text-info me-2"></i>我的聊天室
               </button>
               {# 選單項目 2: 我預約的商品 #}
               <button class="btn btn-mg btn-outline-primary text-start" id="v-pills-reservations-tab" data-bs-toggle="pill" data-bs-target="#v-pills-reservations" type="button" role="tab" aria-controls="v-pills-reservations" aria-selected="false">
@@ -86,6 +91,48 @@
                       <p class="text-muted">您還沒有收藏任何商品。</p>
                   {% endfor %}
                   </div>
+              </div>
+              
+              {# 內容區塊 - 我的聊天室 #}
+              <div class="tab-pane fade" id="v-pills-conversations" role="tabpanel" aria-labelledby="v-pills-conversations-tab" tabindex="0">
+                  <h2 class="mb-4">我的聊天室<i class="bi bi-chat-dots-fill text-info"></i></h2>
+                  {% if conversations_for_profile_tab %}
+                      <div class="list-group">
+                          {% for conv_item in conversations_for_profile_tab %} {# 使用 conv_item 作為迴圈變數 #}
+                              <a href="{% url 'chat:chat_detail' conv_item.conversation_id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                                  <div class="d-flex w-100 justify-content-between">
+                                      <h5 class="mb-1">
+                                          {{ conv_item.other_user_username }}
+                                      </h5>
+                                      {% if conv_item.has_actual_message %}
+                                          <small class="text-muted">{{ conv_item.last_message_timestamp|timesince }} {% translate "ago" %}</small>
+                                      {% else %}
+                                          {# 如果沒有實際訊息，顯示對話創建時間 #}
+                                          <small class="text-muted">{{ conv_item.conversation_created_at|timesince }} {% translate "ago" %} ({% translate "New" %})</small>
+                                      {% endif %}
+                                  </div>
+                                  <p class="mb-1">
+                                      {% if conv_item.has_actual_message %}
+                                          {% if conv_item.is_last_message_from_current_user %}
+                                              <strong class="text-muted">{% translate "You" %}:</strong>
+                                          {% endif %}
+                                          {{ conv_item.last_message_content|truncatechars:70 }}
+                                      {% else %}
+                                          <em>{% translate "No messages yet." %}</em>
+                                      {% endif %}
+                                  </p>
+                                  {% if conv_item.unread_count > 0 %}
+                                      <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
+                                          {{ conv_item.unread_count }}
+                                          <span class="visually-hidden">{% translate "unread messages" %}</span>
+                                      </span>
+                                  {% endif %}
+                              </a>
+                          {% endfor %}
+                      </div>
+                  {% else %}
+                      <p>{% translate "You currently have no conversations." %}</p>
+                  {% endif %}
               </div>
 
               {# 內容區塊 2: 我預約的商品 #}

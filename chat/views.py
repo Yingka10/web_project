@@ -2,6 +2,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from chat.models import Conversation, Message
+from django.db.models import Q, OuterRef, Subquery, Max, Value, CharField
+from django.db.models.functions import Coalesce # 用於處理可能為 None 的情況
 #from mywebsite.models import Post
 from django.contrib.auth import get_user_model
 import logging # 引入 logging 模組
@@ -30,7 +32,7 @@ def chat_with_seller(request, seller_id, product_id):
         print(f"--- chat_with_seller: Found other_user (seller): {other_user} ---") # 新增
     except Exception as e:
         print(f"--- chat_with_seller: Error finding other_user with id {seller_id}: {e} ---") # 新增
-        return redirect('home')
+        return redirect('index')
 
     # product = get_object_or_404(Post, id=product_id)
     # print(f"--- chat_with_seller: Product (if used): {product_id} ---") # 如果將來使用 product_id
@@ -46,16 +48,16 @@ def chat_with_seller(request, seller_id, product_id):
         print(f"--- chat_with_seller: Conversation {'created' if created else 'found'}: ID={conversation.id} ---") # 新增
     except Exception as e:
         print(f"--- chat_with_seller: Error get_or_create Conversation: {e} ---") # 新增
-        return redirect('home')
+        return redirect('index')
 
     print(f"--- chat_with_seller: Attempting to redirect to 'chat_detail' with conversation_id: {conversation.id} ---") # 新增
     try:
-        response = redirect('chat_detail', conversation_id=conversation.id)
+        response = redirect('chat:chat_detail', conversation_id=conversation.id)
         print(f"--- chat_with_seller: Redirect response created. Status code should be 302. ---") # 新增
         return response
     except Exception as e:
         print(f"--- chat_with_seller: Error during redirect to 'chat_detail': {e} ---") # 新增
-        return redirect('home')
+        return redirect('index')
 
 @login_required
 def chat_with_buyer(request, buyer_id, product_id):
@@ -83,7 +85,7 @@ def chat_with_buyer(request, buyer_id, product_id):
         print(f"--- chat_with_buyer: Found other_user: {other_user} ---")
     except Exception as e:
         print(f"--- chat_with_buyer: Error finding other_user with id {buyer_id}: {e} ---")
-        return redirect('home') # 或者其他錯誤處理
+        return redirect('index') # 或者其他錯誤處理
 
     # product = get_object_or_404(Post, id=product_id) # 假設 Post 模型相關邏輯暫時不需要
 
@@ -99,17 +101,17 @@ def chat_with_buyer(request, buyer_id, product_id):
     except Exception as e:
         print(f"--- chat_with_buyer: Error get_or_create Conversation: {e} ---")
         # 考慮錯誤處理，例如重定向到錯誤頁面或首頁
-        return redirect('home') 
+        return redirect('index') 
 
     print(f"--- chat_with_buyer: Attempting to redirect to 'chat_detail' with conversation_id: {conversation.id} ---")
     try:
-        response = redirect('chat_detail', conversation_id=conversation.id)
+        response = redirect('chat:chat_detail', conversation_id=conversation.id)
         print(f"--- chat_with_buyer: Redirect response created. Status code should be 302. ---")
         return response
     except Exception as e: # 例如 NoReverseMatch
         print(f"--- chat_with_buyer: Error during redirect to 'chat_detail': {e} ---")
         # 這裡也需要錯誤處理
-        return redirect('home')
+        return redirect('index')
 
 @login_required
 def chat_detail(request, conversation_id):
@@ -146,12 +148,12 @@ def chat_detail(request, conversation_id):
     except Exception as e:
         print(f"--- Error fetching conversation with ID {conversation_id}: {e} ---") # 新增日誌
         # 根據您的應用邏輯，這裡可能需要返回一個錯誤頁面或重定向
-        return redirect('home') # 或其他適當的錯誤處理
+        return redirect('index') # 或其他適當的錯誤處理
 
     # 檢查只有對話成員可以查看聊天室
     if request.user not in [conversation.user1, conversation.user2]:
         print(f"--- User {request.user} is not part of conversation {conversation.id}. Redirecting. ---") # 新增日誌
-        return redirect('home')
+        return redirect('index')
 
     if request.method == "POST":
         content = request.POST.get('message')
@@ -181,12 +183,3 @@ def chat_detail(request, conversation_id):
     # --- 結束除錯日誌 ---
 
     return render(request, 'chat.html', context_to_pass)
-
-@login_required
-def conversation_list(request):
-    # 找出目前使用者參與的所有對話（無論存在哪個欄位中）
-    from django.db.models import Q
-    conversations = Conversation.objects.filter(
-        Q(user1=request.user) | Q(user2=request.user)
-    ).order_by('-created_at')
-    return render(request, 'conversation_list.html', {'conversations': conversations})
