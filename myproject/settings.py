@@ -54,13 +54,12 @@ ASGI_APPLICATION = 'myproject.asgi.application'
 redis_url = os.environ.get('REDIS_URL')
 url = urlparse.urlparse(redis_url)
 
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(url.hostname, url.port)],
-            "password": url.password,
-            "ssl": True,  # Upstash 是 TLS 連線
+            "hosts": [os.environ.get("REDIS_URL")],
         },
     },
 }
