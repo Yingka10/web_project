@@ -2,7 +2,6 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone # 引入 timezone
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
 from mywebsite.models import Post, Category, Reservation , ProductImage, Rating, Notification, CustomUser
 from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
@@ -16,7 +15,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from .form import CustomUserCreationForm
 from .models import ChatMessage 
-
+from django.db.models import Q, OuterRef, Subquery, Value, CharField, IntegerField, DateTimeField, F
+from django.db.models.functions import Coalesce
+from .models import Post, Rating 
+from chat.models import Conversation as ChatConversation, Message as ChatMessage
 
 @login_required
 def chat(request, role, chat_with_id, product_id):
@@ -110,29 +112,94 @@ def toggle_favorite(request, id):
     return redirect(request.META.get('HTTP_REFERER', 'index'))
 
 @login_required
-def profile(request):
-    favorites = request.user.favorite_posts.prefetch_related('images').all()
-    user_reservations = request.user.reservations.select_related('product').prefetch_related('product__images').order_by(
-        '-reserved_at')
-    all_my_posts = request.user.posts.prefetch_related('images').all()
+def profile(request): # 您的 profile 視圖
+    current_user = request.user
+
+    # --- 您現有的獲取其他個人頁面數據的邏輯 ---
+    favorites = current_user.favorite_posts.prefetch_related('images').all()
+    user_reservations = current_user.reservations.select_related('product').prefetch_related('product__images').order_by('-reserved_at')
+    all_my_posts = current_user.posts.prefetch_related('images').all()
     active_posts = all_my_posts.filter(is_sold=False)
     sold_posts = all_my_posts.filter(is_sold=True)
-    purchased_posts = Post.objects.filter(buyer=request.user, is_sold=True).prefetch_related('images')
+    purchased_posts = Post.objects.filter(buyer=current_user, is_sold=True).prefetch_related('images')
 
     for post in sold_posts:
         if post.buyer:
-            post.can_rate_buyer = not Rating.objects.filter(rater=request.user, rated=post.buyer, post=post).exists()
+            post.can_rate_buyer = not Rating.objects.filter(rater=current_user, rated=post.buyer, post=post).exists()
 
     for post in purchased_posts:
-        post.can_rate_seller = not Rating.objects.filter(rater=request.user, rated=post.owner, post=post).exists()
+        post.can_rate_seller = not Rating.objects.filter(rater=current_user, rated=post.owner, post=post).exists()
+    # --- 現有邏輯結束 ---
 
-    return render(request, "profile.html", {
+    # --- 獲取用戶的對話列表 (基於方案2，直接在 profile 視圖中) ---
+    # 子查詢，用於獲取每個對話的最後一條訊息的內容
+    last_message_content_subquery = ChatMessage.objects.filter(
+        conversation=OuterRef('pk')
+    ).order_by('-timestamp').values('content')[:1]
+
+    # 子查詢，用於獲取每個對話的最後一條訊息的時間戳
+    last_message_timestamp_subquery = ChatMessage.objects.filter(
+        conversation=OuterRef('pk')
+    ).order_by('-timestamp').values('timestamp')[:1]
+    
+    # 子查詢，用於獲取每個對話的最後一條訊息的發送者 ID
+    last_message_sender_id_subquery = ChatMessage.objects.filter(
+        conversation=OuterRef('pk')
+    ).order_by('-timestamp').values('sender_id')[:1]
+
+    user_conversations_qs = ChatConversation.objects.filter(
+        Q(user1=current_user) | Q(user2=current_user)
+    ).annotate(
+        # 使用 Coalesce 提供一個預設值，以防某些對話沒有任何訊息
+        annotated_last_message_content=Coalesce(
+            Subquery(last_message_content_subquery, output_field=CharField(null=True)),
+            Value(''), # 如果子查詢結果為 None，則預設為空字串
+            output_field=CharField() # Coalesce 本身的 output_field
+        ),
+        annotated_last_message_timestamp=Coalesce(
+            Subquery(last_message_timestamp_subquery, output_field=DateTimeField(null=True)),
+            F('created_at'), # *** 修正點：使用 F() 引用外部查詢的欄位 ***
+            output_field=DateTimeField() # *** 為 Coalesce 明確指定 output_field ***
+        ),
+        annotated_last_message_sender_id=Subquery(
+            last_message_sender_id_subquery,
+            output_field=IntegerField(null=True)
+        )
+    ).order_by('-annotated_last_message_timestamp')
+
+    # 處理對方用戶和組裝最終數據
+    conversations_for_profile_tab = []
+
+    for conv_obj in user_conversations_qs: # conv_obj 是 Conversation 物件，帶有 annotate 的欄位
+        other_user_in_conv = conv_obj.user2 if conv_obj.user1 == current_user else conv_obj.user1
+        is_last_msg_from_current_user = (conv_obj.annotated_last_message_sender_id == current_user.id)
+        
+        # 判斷是否有實際的訊息
+        has_actual_message = conv_obj.annotated_last_message_sender_id is not None
+
+        conversations_for_profile_tab.append({
+            'conversation_id': conv_obj.id, # 直接傳遞 ID
+            'other_user_username': other_user_in_conv.username, # 直接傳遞用戶名
+            'other_user_id': other_user_in_conv.id, # 如果需要對方用戶ID
+            'last_message_content': conv_obj.annotated_last_message_content,
+            'last_message_timestamp': conv_obj.annotated_last_message_timestamp,
+            'is_last_message_from_current_user': is_last_msg_from_current_user,
+            'has_actual_message': has_actual_message,
+            'conversation_created_at': conv_obj.created_at, # 用於沒有訊息時的排序或顯示
+            'unread_count': 0 # 簡化：未讀訊息計數需要額外邏輯和 Message 模型中的 is_read 欄位
+        })
+    # --- 獲取對話列表結束 ---
+
+    context = {
         'favorites': favorites,
         'user_reservations': user_reservations,
         'active_posts': active_posts,
         'sold_posts': sold_posts,
-        'purchased_posts': purchased_posts
-    })
+        'purchased_posts': purchased_posts,
+        'conversations_for_profile_tab': conversations_for_profile_tab, # 將對話列表數據傳遞給模板
+        # 'user': current_user, # request.user 在模板中默認可用
+    }
+    return render(request, "profile.html", context)
 
 @csrf_exempt
 def api(request):

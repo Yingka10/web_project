@@ -42,7 +42,7 @@ urlpatterns = [
     path('product/<int:product_id>/choose_buyer/', mywebsite_views.choose_buyer, name='choose_buyer'),
     path('notifications/', mywebsite_views.notification_list, name='notification_list'),
     path('rate_seller/<int:post_id>/', rate_seller, name='rate_seller'),
-    path('chat/', include('chat.urls')),
+    path('chat/', include('chat.urls', namespace='chat')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
