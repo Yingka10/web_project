@@ -25,16 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-if os.environ.get('RENDER'):
-    ALLOWED_HOSTS = ['.onrender.com']
-    CSRF_TRUSTED_ORIGINS = ['https://你的 render 網址']
-elif os.environ.get('RAILWAY'):
-    ALLOWED_HOSTS = ['webproject-ncu.up.railway.app']
-    CSRF_TRUSTED_ORIGINS = ['https://webproject-ncu.up.railway.app']
-else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-    CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1']
-
+ALLOWED_HOSTS = ['localhost', 'onrenday.com', 'webproject-ncu.up.railway.app']
 
 
 # Application definition
