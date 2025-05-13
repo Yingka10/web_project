@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import urllib.parse as urlparse
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -50,10 +51,18 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'myproject.asgi.application'
 
 # 設定 Channels layer，建議使用 Redis 作後台
+redis_url = os.environ.get('REDIS_URL')
+url = urlparse.urlparse(redis_url)
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(url.hostname, url.port)],
+            "password": url.password,
+            "ssl": True,  # Upstash 是 TLS 連線
+        },
+    },
 }
 
 MIDDLEWARE = [
