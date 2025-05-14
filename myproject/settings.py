@@ -25,10 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-if os.environ.get('RENDER'):
-    ALLOWED_HOSTS = ['.onrender.com']
-else:
-    ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', 'onrenday.com', 'ncu-second-hand.onrender.com' ,'webproject-ncu.up.railway.app']
 
 
 # Application definition
@@ -59,8 +56,9 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            #"hosts": os.environ.get("REDIS_URL"),
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(url.hostname, url.port)],  # 用正確的 URL 主機名與端口
+            "password": url.password,  # 如果有密碼
+            "ssl": True,  # 若使用加密連線
         },
     },
 }
@@ -75,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CSRF_TRUSTED_ORIGINS = ['https://webproject-ncu.up.railway.app']
 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
