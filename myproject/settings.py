@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'onrenday.com', 'ncu-second-hand.onrender.com' ,'webproject-ncu.up.railway.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'onrenday.com', 'ncu-second-hand.onrender.com' ,'webproject-ncu.up.railway.app']
 
 
 # Application definition
@@ -73,7 +73,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://webproject-ncu.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://webproject-ncu.up.railway.app','https://ncu-second-hand.onrender.com/']
 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
