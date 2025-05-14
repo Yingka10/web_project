@@ -3,6 +3,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from chat.models import Message, Conversation
 from channels.db import database_sync_to_async
+from django.utils import timezone 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -96,41 +97,69 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # 處理來自 WebSocket 的訊息
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data.get('message')
+        message_content = data.get('message')
         # sender = data.get('sender')
         # seller_id = data.get('seller_id')
         # product_id = data.get('product_id')
 
+        if not message_content: # 簡單驗證
+            print("DEBUG receive: Received empty message content.")
+            return
+        print(f"DEBUG receive: Received message content: '{message_content[:50]}...' from user: {self.scope['user'].username}")
+
         # 保存訊息到資料庫
-        await self.save_message(message)
+        await self.save_message(message_content)
 
         # 廣播訊息到聊天室群組
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',  # 將調用下面的 chat_message 方法
-                'message': message,
+                'message': message_content,
                 'sender': self.scope["user"].username,
             }
         )
+        print(f"DEBUG receive: Message sent to group {self.room_group_name}")
 
     # 接收群組訊息，並發送回 WebSocket
     async def chat_message(self, event):
-        message = event['message']
-        sender = event['sender']
+        message_to_send = event['message']
+        sender_username = event['sender']
+        
+        # 非常重要的日誌：記錄是哪個用戶的 Consumer 實例在處理哪個事件
+        print(f"DEBUG chat_message: 消費者實例 (用戶 '{self.scope['user'].username}', 群組 '{self.room_group_name}') "
+          f"正在處理來自發送者 '{sender_username}' 的訊息: '{message_to_send[:50]}...'")
+    
+        print(f"DEBUG chat_message: Sending message to WebSocket client: '{message_to_send[:50]}...' from sender: {sender_username}")
 
         await self.send(text_data=json.dumps({
-            'message': message,
-            'sender': sender,
+            'message': message_to_send,
+            'sender': sender_username,
         }))
+        print(f"DEBUG chat_message: 訊息已通過 WebSocket 由消費者實例 (用戶 '{self.scope['user'].username}') 發送")
 
     # 藉由同步函式保存訊息
     @database_sync_to_async
-    def save_message(self, message):
-        # 根據 conversation_id 取得對話，並建立一筆新訊息
-        conversation = Conversation.objects.get(pk=self.conversation_id)
-        Message.objects.create(
-            conversation=conversation,
-            sender=self.scope["user"],
-            content=message,
-        )
+    def save_message(self, message_content_param):
+        try:
+            current_user = self.scope["user"]
+            print(f"DEBUG save_message: Attempting to save message for conversation_id: {self.conversation_id}, user: {current_user.username}")
+            
+            conversation_obj = Conversation.objects.get(pk=self.conversation_id)
+            
+            new_msg = Message.objects.create(
+                conversation=conversation_obj,
+                sender=current_user,
+                content=message_content_param, # 使用傳入的參數
+            )
+            print(f"DEBUG save_message: Message saved with ID: {new_msg.id}, content: '{new_msg.content[:30]}...'")
+
+            # 更新對話的 updated_at 時間戳
+            conversation_obj.updated_at = timezone.now()
+            conversation_obj.save(update_fields=['updated_at']) # 只更新 updated_at 字段
+            print(f"DEBUG save_message: Conversation {conversation_obj.id} updated_at timestamp to {conversation_obj.updated_at}.")
+
+        except Conversation.DoesNotExist:
+            print(f"ERROR save_message: Conversation with ID {self.conversation_id} does not exist.")
+        except Exception as e:
+            print(f"ERROR save_message: Failed to save message. Error: {e}, User: {current_user.username if 'current_user' in locals() else 'Unknown'}")

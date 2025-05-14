@@ -6,10 +6,14 @@ from django.db.models import Q, OuterRef, Subquery, Max, Value, CharField
 from django.db.models.functions import Coalesce # 用於處理可能為 None 的情況
 #from mywebsite.models import Post
 from django.contrib.auth import get_user_model
-import logging # 引入 logging 模組
+from django.http import HttpResponseForbidden, JsonResponse
+from django.urls import reverse
+from django.utils import timezone
+from django.contrib import messages
 
-# 獲取一個 logger 實例
-logger = logging.getLogger(__name__)
+import logging # 引入 logging 模組
+logger = logging.getLogger(__name__)# 獲取一個 logger 實例
+User = get_user_model()
 
 @login_required
 def chat_with_seller(request, seller_id, product_id):
@@ -29,34 +33,49 @@ def chat_with_seller(request, seller_id, product_id):
     User = get_user_model()
     try:
         other_user = get_object_or_404(User, id=seller_id)
-        print(f"--- chat_with_seller: Found other_user (seller): {other_user} ---") # 新增
+        print(f"--- chat_with_seller: 找到對方用戶 (賣家): {other_user} ---")
+    except User.DoesNotExist:
+        print(f"--- chat_with_seller: 找不到 ID 為 {seller_id} 的用戶 ---")
+        messages.error(request, "指定的用戶不存在。")
+        return redirect('index') # 假設 'index' 是您的首頁 URL 名稱
     except Exception as e:
-        print(f"--- chat_with_seller: Error finding other_user with id {seller_id}: {e} ---") # 新增
+        print(f"--- chat_with_seller: 一般錯誤: {e} ---")
+        messages.error(request, "發生未知錯誤，請稍後再試。")
+        return redirect('index')
+    
+    current_user = request.user
+    if current_user == other_user:
+        messages.error(request, "您不能與自己開始聊天。")
         return redirect('index')
 
-    # product = get_object_or_404(Post, id=product_id)
-    # print(f"--- chat_with_seller: Product (if used): {product_id} ---") # 如果將來使用 product_id
+    # 確保 user1 和 user2 的 ID 順序正確
+    user1_obj, user2_obj = (current_user, other_user) if current_user.id < other_user.id else (other_user, current_user)
 
-    user1, user2 = sorted([request.user, other_user], key=lambda user: user.id)
-    print(f"--- chat_with_seller: Trying to get_or_create Conversation for user1={user1.id}, user2={user2.id} ---") # 新增
+    print(f"--- chat_with_seller: 嘗試取得或建立對話，用戶1={user1_obj.id}, 用戶2={user2_obj.id} ---")
     try:
         conversation, created = Conversation.objects.get_or_create(
-            user1=user1,
-            user2=user2
-            # post=product,
+            user1=user1_obj,
+            user2=user2_obj
+            # 移除了 product
         )
-        print(f"--- chat_with_seller: Conversation {'created' if created else 'found'}: ID={conversation.id} ---") # 新增
+        # 確保新建立的對話也有正確的 updated_at
+        if created:
+            conversation.updated_at = timezone.now()
+            conversation.save(update_fields=['updated_at'])
+        print(f"--- chat_with_seller: 對話 {'已建立' if created else '已找到'}: ID={conversation.id} ---")
     except Exception as e:
-        print(f"--- chat_with_seller: Error get_or_create Conversation: {e} ---") # 新增
+        print(f"--- chat_with_seller: 取得或建立對話時發生錯誤: {e} ---")
+        messages.error(request, "建立或取得對話失敗。")
         return redirect('index')
 
-    print(f"--- chat_with_seller: Attempting to redirect to 'chat_detail' with conversation_id: {conversation.id} ---") # 新增
+    print(f"--- chat_with_seller: 嘗試重定向至 'chat:chat_detail'，對話 ID: {conversation.id} ---")
     try:
         response = redirect('chat:chat_detail', conversation_id=conversation.id)
-        print(f"--- chat_with_seller: Redirect response created. Status code should be 302. ---") # 新增
+        print(f"--- chat_with_seller: 重定向回應已建立。 ---")
         return response
-    except Exception as e:
-        print(f"--- chat_with_seller: Error during redirect to 'chat_detail': {e} ---") # 新增
+    except Exception as e: # 例如 NoReverseMatch
+        print(f"--- chat_with_seller: 重定向至 'chat:chat_detail' 時發生錯誤: {e} ---")
+        messages.error(request, "無法開啟聊天室。")
         return redirect('index')
 
 @login_required
@@ -78,39 +97,61 @@ def chat_with_buyer(request, buyer_id, product_id):
     # )
     # # 導向聊天詳情頁面
     # return redirect('chat_detail', conversation_id=conversation.id)
-    print(f"--- Entering chat_with_buyer: buyer_id={buyer_id}, product_id={product_id} ---")
-    User = get_user_model()
+    print(f"--- 進入 chat_with_buyer: buyer_id={buyer_id} ---")
+    current_user = request.user # 假設當前用戶是賣家 (或有權限與買家聊天的用戶)
     try:
-        other_user = get_object_or_404(User, id=buyer_id)
-        print(f"--- chat_with_buyer: Found other_user: {other_user} ---")
+        other_user = get_object_or_404(User, id=buyer_id) # 買家
+        print(f"--- chat_with_buyer: 找到對方用戶 (買家): {other_user} ---")
+    except User.DoesNotExist:
+        print(f"--- chat_with_buyer: 找不到 ID 為 {buyer_id} 的用戶 ---")
+        messages.error(request, "指定的用戶不存在。")
+        return redirect('index')
     except Exception as e:
-        print(f"--- chat_with_buyer: Error finding other_user with id {buyer_id}: {e} ---")
-        return redirect('index') # 或者其他錯誤處理
+        print(f"--- chat_with_buyer: 一般錯誤: {e} ---")
+        messages.error(request, "發生未知錯誤，請稍後再試。")
+        return redirect('index')
 
-    # product = get_object_or_404(Post, id=product_id) # 假設 Post 模型相關邏輯暫時不需要
+    # 如果需要驗證當前用戶是否有權限與此買家聊天（例如，基於某個共同的交易），
+    # 可以在這裡添加邏輯。由於移除了 product，這個驗證可能需要其他依據。
+    # 例如，您可以檢查他們是否有過共同的 Post 互動（如果您的 Post 模型有 buyer 字段）
+    # from mywebsite.models import Post
+    # common_interactions = Post.objects.filter(owner=current_user, buyer=other_user).exists() or \
+    #                       Post.objects.filter(owner=other_user, buyer=current_user).exists()
+    # if not common_interactions:
+    #     messages.error(request, "您沒有權限與此用戶開始對話。")
+    #     return redirect('index')
 
-    user1, user2 = sorted([request.user, other_user], key=lambda user: user.id)
-    print(f"--- chat_with_buyer: Trying to get_or_create Conversation for user1={user1.id}, user2={user2.id} ---")
+
+    if current_user == other_user:
+        messages.error(request, "您不能與自己開始聊天。")
+        return redirect('index')
+
+    user1_obj, user2_obj = (current_user, other_user) if current_user.id < other_user.id else (other_user, current_user)
+
+    print(f"--- chat_with_buyer: 嘗試取得或建立對話，用戶1={user1_obj.id}, 用戶2={user2_obj.id} ---")
     try:
         conversation, created = Conversation.objects.get_or_create(
-            user1=user1,
-            user2=user2
-            # post=product, # 如果 post 欄位在 Conversation 模型中是必須的，需要取消註解並確保 product 有效
+            user1=user1_obj,
+            user2=user2_obj
+            # 移除了 product
         )
-        print(f"--- chat_with_buyer: Conversation {'created' if created else 'found'}: ID={conversation.id} ---")
+        if created:
+            conversation.updated_at = timezone.now()
+            conversation.save(update_fields=['updated_at'])
+        print(f"--- chat_with_buyer: 對話 {'已建立' if created else '已找到'}: ID={conversation.id} ---")
     except Exception as e:
-        print(f"--- chat_with_buyer: Error get_or_create Conversation: {e} ---")
-        # 考慮錯誤處理，例如重定向到錯誤頁面或首頁
-        return redirect('index') 
+        print(f"--- chat_with_buyer: 取得或建立對話時發生錯誤: {e} ---")
+        messages.error(request, "建立或取得對話失敗。")
+        return redirect('index')
 
-    print(f"--- chat_with_buyer: Attempting to redirect to 'chat_detail' with conversation_id: {conversation.id} ---")
+    print(f"--- chat_with_buyer: 嘗試重定向至 'chat:chat_detail'，對話 ID: {conversation.id} ---")
     try:
         response = redirect('chat:chat_detail', conversation_id=conversation.id)
-        print(f"--- chat_with_buyer: Redirect response created. Status code should be 302. ---")
+        print(f"--- chat_with_buyer: 重定向回應已建立。 ---")
         return response
-    except Exception as e: # 例如 NoReverseMatch
-        print(f"--- chat_with_buyer: Error during redirect to 'chat_detail': {e} ---")
-        # 這裡也需要錯誤處理
+    except Exception as e:
+        print(f"--- chat_with_buyer: 重定向至 'chat:chat_detail' 時發生錯誤: {e} ---")
+        messages.error(request, "無法開啟聊天室。")
         return redirect('index')
 
 @login_required
@@ -140,46 +181,109 @@ def chat_detail(request, conversation_id):
     #     'messages': messages_qs,
     # })
 
-    print(f"--- Entering chat_detail view with conversation_id (from URL): {conversation_id} ---") # 新增日誌
-
+    print(f"--- 進入 chat_detail 視圖，對話 ID (來自 URL): {conversation_id} ---")
+    current_user = request.user
     try:
-        conversation = get_object_or_404(Conversation, id=conversation_id)
-        print(f"--- Successfully fetched conversation object: {conversation} (ID: {conversation.id}) ---") # 新增日誌
+        # 移除了 .select_related('product')
+        conversation = get_object_or_404(Conversation.objects.select_related('user1', 'user2'), id=conversation_id)
+        print(f"--- 成功獲取對話物件: {conversation} (ID: {conversation.id}) ---")
+    except Conversation.DoesNotExist:
+        print(f"--- 找不到 ID 為 {conversation_id} 的對話 ---")
+        messages.error(request, "找不到指定的對話。")
+        return redirect('index') # 或其他適當的錯誤處理頁面
     except Exception as e:
-        print(f"--- Error fetching conversation with ID {conversation_id}: {e} ---") # 新增日誌
-        # 根據您的應用邏輯，這裡可能需要返回一個錯誤頁面或重定向
-        return redirect('index') # 或其他適當的錯誤處理
-
-    # 檢查只有對話成員可以查看聊天室
-    if request.user not in [conversation.user1, conversation.user2]:
-        print(f"--- User {request.user} is not part of conversation {conversation.id}. Redirecting. ---") # 新增日誌
+        print(f"--- 獲取 ID 為 {conversation_id} 的對話時發生錯誤: {e} ---")
+        messages.error(request, "載入對話時發生錯誤。")
         return redirect('index')
+
+    if current_user not in [conversation.user1, conversation.user2]:
+        print(f"--- 用戶 {current_user} 不是對話 {conversation.id} 的成員。正在重定向。 ---")
+        # return HttpResponseForbidden("您無權存取此對話。") # 更明確的錯誤
+        messages.error(request, "您無權存取此對話。")
+        return redirect('index')
+
+
+    other_user = conversation.user2 if conversation.user1 == current_user else conversation.user1
+
+    messages_to_mark_read = Message.objects.filter(
+        conversation=conversation,
+        sender=other_user,
+        is_read=False
+    )
+    if messages_to_mark_read.exists():
+        updated_count = messages_to_mark_read.update(is_read=True)
+        print(f"--- 已將 {updated_count} 則訊息標記為已讀，用戶 {current_user.username}，對話 {conversation.id} ---")
 
     if request.method == "POST":
         content = request.POST.get('message')
         if content:
             Message.objects.create(
                 conversation=conversation,
-                sender=request.user,
+                sender=current_user,
                 content=content,
             )
-            print(f"--- POST request: Message saved for conversation {conversation.id}. Redirecting. ---") # 新增日誌
-            return redirect('chat_detail', conversation_id=conversation.id)
-    
+            # 發送新訊息時，更新對話的 updated_at 字段
+            conversation.updated_at = timezone.now() # 或者直接在 Message 的 post_save 信號中處理
+            conversation.save(update_fields=['updated_at'])
+
+            print(f"--- POST 請求: 訊息已儲存於對話 {conversation.id}。正在重定向。 ---")
+            return redirect('chat:chat_detail', conversation_id=conversation.id)
+        else:
+            messages.warning(request, "訊息內容不能為空。")
+            print(f"--- POST 請求: 對話 {conversation.id} 的訊息內容為空。 ---")
+
     messages_qs = conversation.messages.all().order_by('timestamp')
 
-    # --- 添加更詳細的 context 除錯日誌 ---
-    context_to_pass = {
+    context = {
         'conversation': conversation,
-        'messages': messages_qs,
+        'messages_list': messages_qs,
+        'other_user': other_user,
+        # 'product': None, # 移除了 product
     }
-    print(f"--- Context being passed to template for conversation ID {conversation.id}: ---")
-    print(f"Conversation object in context: {context_to_pass.get('conversation')}")
-    if context_to_pass.get('conversation'):
-        print(f"Conversation ID in context: {context_to_pass.get('conversation').id}")
-        print(f"Conversation user1 in context: {context_to_pass.get('conversation').user1}")
-        print(f"Conversation user2 in context: {context_to_pass.get('conversation').user2}")
-    print(f"Request user in context (available via 'request'): {request.user}")
-    # --- 結束除錯日誌 ---
+    print(f"--- 傳遞至模板的上下文，對話 ID {conversation.id} ---")
+    return render(request, 'chat.html', context)
 
-    return render(request, 'chat.html', context_to_pass)
+@login_required
+def send_message_ajax(request, conversation_id): # AJAX 視圖範例
+    if request.method == 'POST':
+        try:
+            conversation = get_object_or_404(Conversation, id=conversation_id)
+        except Conversation.DoesNotExist:
+             return JsonResponse({'status': 'error', 'message': '找不到對話'}, status=404)
+
+        current_user = request.user
+
+        if current_user != conversation.user1 and current_user != conversation.user2:
+            return JsonResponse({'status': 'error', 'message': '未授權'}, status=403)
+
+        content = request.POST.get('content')
+        if content:
+            message = Message.objects.create(
+                conversation=conversation,
+                sender=current_user,
+                content=content
+            )
+            conversation.updated_at = timezone.now()
+            conversation.save(update_fields=['updated_at'])
+
+            # 觸發通知的邏輯 (如果需要)
+            # from mywebsite.models import Notification # 假設 Notification 模型存在
+            # recipient = conversation.user1 if current_user == conversation.user2 else conversation.user2
+            # try:
+            #     Notification.objects.create(
+            #         recipient=recipient,
+            #         message_text=f"{current_user.username} 給您發了一條新訊息: \"{content[:30]}...\"",
+            #         link=reverse('chat:chat_detail', kwargs={'conversation_id': conversation.id})
+            #     )
+            # except Exception as e:
+            #     print(f"創建通知時發生錯誤: {e}")
+
+
+            return JsonResponse({
+                'status': 'success',
+                'message_content': message.content,
+                'sender_username': message.sender.username,
+                'timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        return JsonResponse({'status': 'error', 'message': '訊息內容為必填'}, status=400)
+    return JsonResponse({'status': 'error', 'message': '無效的請求方法'}, status=405)

@@ -99,35 +99,35 @@
                   {% if conversations_for_profile_tab %}
                       <div class="list-group">
                           {% for conv_item in conversations_for_profile_tab %} {# 使用 conv_item 作為迴圈變數 #}
-                              <a href="{% url 'chat:chat_detail' conv_item.conversation_id %}" class="list-group-item list-group-item-action flex-column align-items-start">
-                                  <div class="d-flex w-100 justify-content-between">
-                                      <h5 class="mb-1">
-                                          {{ conv_item.other_user_username }}
-                                      </h5>
-                                      {% if conv_item.has_actual_message %}
-                                          <small class="text-muted">{{ conv_item.last_message_timestamp|timesince }} {% translate "ago" %}</small>
-                                      {% else %}
-                                          {# 如果沒有實際訊息，顯示對話創建時間 #}
-                                          <small class="text-muted">{{ conv_item.conversation_created_at|timesince }} {% translate "ago" %} ({% translate "New" %})</small>
-                                      {% endif %}
-                                  </div>
-                                  <p class="mb-1">
-                                      {% if conv_item.has_actual_message %}
-                                          {% if conv_item.is_last_message_from_current_user %}
-                                              <strong class="text-muted">{% translate "You" %}:</strong>
-                                          {% endif %}
-                                          {{ conv_item.last_message_content|truncatechars:70 }}
-                                      {% else %}
-                                          <em>{% translate "No messages yet." %}</em>
-                                      {% endif %}
-                                  </p>
-                                  {% if conv_item.unread_count > 0 %}
-                                      <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
-                                          {{ conv_item.unread_count }}
-                                          <span class="visually-hidden">{% translate "unread messages" %}</span>
-                                      </span>
-                                  {% endif %}
-                              </a>
+                              <a href="{% url 'chat:chat_detail' conv_item.conversation_id %}" class="list-group-item list-group-item-action flex-column align-items-start position-relative"> {# <--- 添加 position-relative #}
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">
+                                        {% blocktrans with username=conv_item.other_user_username %}與 {{ username }} 的對話{% endblocktrans %}
+                                    </h5>
+                                    {% if conv_item.has_actual_message %}
+                                        <small class="text-muted">{{ conv_item.last_message_timestamp|timesince }} {% translate "ago" %}</small>
+                                    {% else %}
+                                        <small class="text-muted">{{ conv_item.conversation_created_at|timesince }} {% translate "ago" %} ({% translate "New" %})</small>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-1">
+                                    {% if conv_item.has_actual_message %}
+                                        {% if conv_item.is_last_message_from_current_user %}
+                                            <strong class="text-muted">{% translate "You" %}:</strong>
+                                        {% endif %}
+                                        {{ conv_item.last_message_content|truncatechars:70 }}
+                                    {% else %}
+                                        <em>尚無訊息</em>
+                                    {% endif %}
+                                </p>
+                                {# 未讀訊息徽章 #}
+                                {% if conv_item.unread_count > 0 %}
+                                    <span class="badge bg-danger rounded-pill" style="position: absolute; top: 10px; right: 10px;"> {# <--- 調整樣式和定位 #}
+                                        {{ conv_item.unread_count }}
+                                        <span class="visually-hidden">{% translate "unread messages" %}</span>
+                                    </span>
+                                {% endif %}
+                            </a>
                           {% endfor %}
                       </div>
                   {% else %}

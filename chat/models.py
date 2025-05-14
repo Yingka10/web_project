@@ -2,6 +2,7 @@
 from django.db import models
 from django.conf import settings
 #from mywebsite.models import Post
+from django.utils import timezone
 
 class Conversation(models.Model):
    
@@ -18,17 +19,21 @@ class Conversation(models.Model):
         db_column='seller_id'
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="建立時間")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="最後更新")
 
     def save(self, *args, **kwargs):
         # 自動依使用者 ID 排序，較小的放在 user1
         if self.user1.id > self.user2.id:
             self.user1, self.user2 = self.user2, self.user1
+        # 確保每次保存時都更新 updated_at
+        if 'update_fields' not in kwargs or 'updated_at' in kwargs.get('update_fields', []):
+             self.updated_at = timezone.now()
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "對話"
         verbose_name_plural = "對話紀錄"
-        ordering = ['-created_at']
+        ordering = ['-updated_at']
         unique_together = (("user1", "user2"),)
 
     def __str__(self):
@@ -50,6 +55,7 @@ class Message(models.Model):
     )
     content = models.TextField("訊息內容")
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="發送時間")
+    is_read = models.BooleanField(default=False, verbose_name="是否已讀")
 
     class Meta:
         verbose_name = "訊息"

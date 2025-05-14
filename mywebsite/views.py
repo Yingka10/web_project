@@ -177,6 +177,12 @@ def profile(request): # 您的 profile 視圖
         # 判斷是否有實際的訊息
         has_actual_message = conv_obj.annotated_last_message_sender_id is not None
 
+        unread_message_count = ChatMessage.objects.filter(
+            conversation=conv_obj,      # 屬於當前這個對話
+            sender=other_user_in_conv,  # 訊息是由對方發送的
+            is_read=False               # 且訊息是未讀的
+        ).count()
+
         conversations_for_profile_tab.append({
             'conversation_id': conv_obj.id, # 直接傳遞 ID
             'other_user_username': other_user_in_conv.username, # 直接傳遞用戶名
@@ -186,7 +192,7 @@ def profile(request): # 您的 profile 視圖
             'is_last_message_from_current_user': is_last_msg_from_current_user,
             'has_actual_message': has_actual_message,
             'conversation_created_at': conv_obj.created_at, # 用於沒有訊息時的排序或顯示
-            'unread_count': 0 # 簡化：未讀訊息計數需要額外邏輯和 Message 模型中的 is_read 欄位
+            'unread_count': unread_message_count
         })
     # --- 獲取對話列表結束 ---
 

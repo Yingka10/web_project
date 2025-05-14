@@ -50,21 +50,21 @@
 
     <div id="chat-box" class="chat-box">
       <!-- 現有訊息可由伺服器渲染，也可以僅靠 WebSocket 即時加入 -->
-      {% for message in messages %}
-      {% if message.sender == request.user.username %}
-        <div class="message right">
-          <strong>{{ message.sender }}:</strong><br>
-          {{ message.content }}
-        </div>
-      {% else %}
-        <div class="message left">
-          <strong>{{ message.sender }}:</strong><br>
-          {{ message.content }}
-        </div>
-      {% endif %}
-    {% empty %}
-      <p>尚無訊息</p>
-    {% endfor %}
+      {% for message_item in messages_list %}  {# <<< 從 'messages' 改為 'messages_list' #}
+        {% if message_item.sender == request.user %}  {# <<< User 對象與 User 對象比較 #}
+          <div class="message right">
+            <strong>{{ message_item.sender.username }}:</strong><br> {# <<< 顯式使用 username #}
+            {{ message_item.content }}
+          </div>
+        {% else %}
+          <div class="message left">
+            <strong>{{ message_item.sender.username }}:</strong><br> {# <<< 顯式使用 username #}
+            {{ message_item.content }}
+          </div>
+        {% endif %}
+      {% empty %}
+        <p>尚無訊息</p>
+      {% endfor %}
     </div>
 
     <!-- 輸入訊息表單 -->
@@ -101,9 +101,10 @@
 
     // 當收到訊息時，更新聊天框內容
     chatSocket.onmessage = function(e) {
+      console.log("JS onmessage: 收到 WebSocket 數據:", e.data);
       const data = JSON.parse(e.data);
-      const message = data['message'];
-      const sender = data['sender'];
+      const messageContent = data['message'];
+      const senderUsername = data['sender'];
       const chatBox = document.getElementById('chat-box');
 
       // 建立新的訊息區塊
@@ -111,13 +112,13 @@
       messageDiv.classList.add('message');
 
       // 判斷發送者決定顯示在左或右
-      if (sender === '{{ request.user.username }}') {
+      if (senderUsername === '{{ request.user.username }}') {
         messageDiv.classList.add('right');
       } else {
         messageDiv.classList.add('left');
       }
 
-      messageDiv.innerHTML = '<strong>' + sender + ':</strong><br>' + message;
+      messageDiv.innerHTML = '<strong>' + senderUsername + ':</strong><br>' + messageContent;
       chatBox.appendChild(messageDiv);
       
       // 自動捲到最底部
@@ -136,15 +137,14 @@
     document.getElementById('chat-form').onsubmit = function(e) {
       e.preventDefault();
       const messageInputDom = document.getElementById('message-input');
-      const message = messageInputDom.value;
-      if (message.trim() === '') {
+      const messageToSend = messageInputDom.value;
+      if (messageToSend.trim() === '') {
         return;
       }
       // 確認 WebSocket 連線狀態是否處於開啟狀態
       if (chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify({
-          'message': message,
-          'sender': "{{ request.user.username }}"
+          'message': messageToSend,
         }));
         messageInputDom.value = '';
       } else {
