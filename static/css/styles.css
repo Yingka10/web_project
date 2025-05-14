@@ -140,3 +140,30 @@ footer {
   background: #399e9c;
   color: #fff
 }
+
+.chat-container {
+    width: 80%;
+    margin: auto;
+}
+.chat-box {
+    border: 1px solid #ccc;
+    padding: 20px;
+    min-height: 300px;
+    max-height: 400px; /* 設定最大高度 */
+    overflow-y: auto; /* 顯示垂直捲軸 */
+}
+.message {
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    max-width: 60%;
+}
+.message.right {
+    background-color: #a0e0a0;
+    text-align: right;
+    margin-left: auto;
+}
+.message.left {
+    background-color: #f0f0f0;
+    text-align: left;
+}

@@ -3,39 +3,6 @@
 {% block title %}聊天室{% endblock %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <title>Chat with Seller</title>
-  <style>
-    .chat-container {
-      width: 80%;
-      margin: auto;
-    }
-    .chat-box {
-      border: 1px solid #ccc;
-      padding: 20px;
-      min-height: 300px;
-      overflow-y: auto;
-    }
-    .message {
-      padding: 10px;
-      border-radius: 5px;
-      margin: 10px 0;
-      max-width: 60%;
-    }
-    .message.right {
-      background-color: #a0e0a0;
-      text-align: right;
-      margin-left: auto;
-    }
-    .message.left {
-      background-color: #f0f0f0;
-      text-align: left;
-    }
-  </style>
-</head>
 <body>
   <div class="chat-container">
     <h1>聊天室</h1>
@@ -72,84 +39,85 @@
       <button type="submit">送出</button>
     </form>
   </div>
-
-  <script>
-  
-    // 根據使用者角色決定房間名稱前綴
-    const roomPrefix = "{% if conversation.user1.id == request.user.id %}chat_buyer{% else %}chat_seller{% endif %}";
-    const roomID = "{{ conversation.id }}";
-    const roomName = roomPrefix + '_' + roomID;
-
-    // 利用 console.log 印出 roomID，方便在瀏覽器中檢查它是否正確
-    console.log("Generated roomID:", roomID);
-
-    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const socketUrl = protocol + window.location.host + '/ws/chat/' + roomID + '/';
-  
-
-    // 用 console.log 檢查生成的 URL
-    console.log('Socket URL:', socketUrl);
-
-    const chatSocket = new WebSocket(socketUrl);
-
-    // 當連線成功建立時
-    chatSocket.onopen = function(e) {
-      console.log('WebSocket 連線已建立');
-    };
-
-    // 當收到訊息時，更新聊天框內容
-    chatSocket.onmessage = function(e) {
-      console.log("JS onmessage: 收到 WebSocket 數據:", e.data);
-      const data = JSON.parse(e.data);
-      const messageContent = data['message'];
-      const senderUsername = data['sender'];
-      const chatBox = document.getElementById('chat-box');
-
-      // 建立新的訊息區塊
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message');
-
-      // 判斷發送者決定顯示在左或右
-      if (senderUsername === '{{ request.user.username }}') {
-        messageDiv.classList.add('right');
-      } else {
-        messageDiv.classList.add('left');
-      }
-
-      messageDiv.innerHTML = '<strong>' + senderUsername + ':</strong><br>' + messageContent;
-      chatBox.appendChild(messageDiv);
-      
-      // 自動捲到最底部
-      chatBox.scrollTop = chatBox.scrollHeight;
-    };
-    
-    // 建立連線錯誤或連線關閉時的處理
-    chatSocket.onerror = function(e) {
-      console.error('WebSocket 連線錯誤:', e);
-    };
-    chatSocket.onclose = function(e) {
-      console.error('聊天室連線意外中斷');
-    };
-
-    // 發送訊息
-    document.getElementById('chat-form').onsubmit = function(e) {
-      e.preventDefault();
-      const messageInputDom = document.getElementById('message-input');
-      const messageToSend = messageInputDom.value;
-      if (messageToSend.trim() === '') {
-        return;
-      }
-      // 確認 WebSocket 連線狀態是否處於開啟狀態
-      if (chatSocket.readyState === WebSocket.OPEN) {
-        chatSocket.send(JSON.stringify({
-          'message': messageToSend,
-        }));
-        messageInputDom.value = '';
-      } else {
-        console.error('WebSocket 連線尚未開啟或已關閉');
-      }
-    };
-  </script>
 </body>
-</html>
+<script>
+    window.onload = function() {
+    const chatBox = document.getElementById('chat-box');
+    chatBox.scrollTop = chatBox.scrollHeight;
+  };
+  // 根據使用者角色決定房間名稱前綴
+  const roomPrefix = "{% if conversation.user1.id == request.user.id %}chat_buyer{% else %}chat_seller{% endif %}";
+  const roomID = "{{ conversation.id }}";
+  const roomName = roomPrefix + '_' + roomID;
+
+  // 利用 console.log 印出 roomID，方便在瀏覽器中檢查它是否正確
+  console.log("Generated roomID:", roomID);
+
+  const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+  const socketUrl = protocol + window.location.host + '/ws/chat/' + roomID + '/';
+
+
+  // 用 console.log 檢查生成的 URL
+  console.log('Socket URL:', socketUrl);
+
+  const chatSocket = new WebSocket(socketUrl);
+
+  // 當連線成功建立時
+  chatSocket.onopen = function(e) {
+    console.log('WebSocket 連線已建立');
+  };
+
+  // 當收到訊息時，更新聊天框內容
+  chatSocket.onmessage = function(e) {
+    console.log("JS onmessage: 收到 WebSocket 數據:", e.data);
+    const data = JSON.parse(e.data);
+    const messageContent = data['message'];
+    const senderUsername = data['sender'];
+    const chatBox = document.getElementById('chat-box');
+
+    // 建立新的訊息區塊
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+
+    // 判斷發送者決定顯示在左或右
+    if (senderUsername === '{{ request.user.username }}') {
+      messageDiv.classList.add('right');
+    } else {
+      messageDiv.classList.add('left');
+    }
+
+    messageDiv.innerHTML = '<strong>' + senderUsername + ':</strong><br>' + messageContent;
+    chatBox.appendChild(messageDiv);
+    
+    // 自動捲到最底部
+    chatBox.scrollTop = chatBox.scrollHeight;
+  };
+  
+  // 建立連線錯誤或連線關閉時的處理
+  chatSocket.onerror = function(e) {
+    console.error('WebSocket 連線錯誤:', e);
+  };
+  chatSocket.onclose = function(e) {
+    console.error('聊天室連線意外中斷');
+  };
+
+  // 發送訊息
+  document.getElementById('chat-form').onsubmit = function(e) {
+    e.preventDefault();
+    const messageInputDom = document.getElementById('message-input');
+    const messageToSend = messageInputDom.value;
+    if (messageToSend.trim() === '') {
+      return;
+    }
+    // 確認 WebSocket 連線狀態是否處於開啟狀態
+    if (chatSocket.readyState === WebSocket.OPEN) {
+      chatSocket.send(JSON.stringify({
+        'message': messageToSend,
+      }));
+      messageInputDom.value = '';
+    } else {
+      console.error('WebSocket 連線尚未開啟或已關閉');
+    }
+  };
+</script>
 {% endblock %}
