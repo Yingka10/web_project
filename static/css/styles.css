@@ -142,28 +142,83 @@ footer {
 }
 
 .chat-container {
-    width: 80%;
-    margin: auto;
+  width: 80%;
+  margin: auto;
 }
 .chat-box {
-    border: 1px solid #ccc;
-    padding: 20px;
-    min-height: 300px;
-    max-height: 400px; /* 設定最大高度 */
-    overflow-y: auto; /* 顯示垂直捲軸 */
+  border: 1px solid #ccc;
+  padding: 20px;
+  min-height: 300px;
+  max-height: 400px; /* 設定最大高度 */
+  overflow-y: auto; /* 顯示垂直捲軸 */
 }
+
+.message-wrapper {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column; /* 確保子元素垂直排列 */
+}
+
+.message-sender {
+  font-size: 0.9em;
+  margin-bottom: 5px; /* 與訊息框的間距 */
+}
+
+.message-sender.right {
+  text-align: right; /* 右側訊息的名稱靠右對齊 */
+}
+
+.message-sender.left {
+  text-align: left; /* 左側訊息的名稱靠左對齊 */
+}
+
 .message {
-    padding: 10px;
-    border-radius: 5px;
-    margin: 10px 0;
-    max-width: 60%;
+  display: inline-block; /* 讓訊息框寬度隨內容調整 */
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 60%; /* 限制最大寬度 */
+  word-wrap: break-word; /* 長字串自動換行 */
 }
+
 .message.right {
-    background-color: #a0e0a0;
-    text-align: right;
-    margin-left: auto;
+  background-color: #a0e0a0;
+  text-align: right;
+  margin-left: auto; /* 確保訊息框靠右對齊 */
 }
+
 .message.left {
-    background-color: #f0f0f0;
-    text-align: left;
+  background-color: #f0f0f0;
+  text-align: left;
+}
+
+.message-time {
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 5px;
+}
+
+.message-time.right {
+  text-align: right;
+}
+
+.message-time.left {
+  text-align: left;
+}
+
+.chat-input-container {
+  display: flex;
+  flex-direction: column; /* 垂直排列輸入框和按鈕 */
+  align-items: flex-end; /* 靠右對齊 */
+  margin-top: 10px; /* 與訊息框的間距 */
+  width: 100%; /* 確保容器寬度與父容器一致 */
+}
+
+#message-input {
+  width: 100%; /* 設定輸入框寬度 */
+  max-width: 400px; /* 限制最大寬度 */
+  margin-bottom: 10px; /* 與按鈕的間距 */
+}
+
+#chat-form button {
+  align-self: flex-end; /* 按鈕靠右對齊 */
 }

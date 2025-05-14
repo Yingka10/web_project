@@ -5,37 +5,35 @@
 {% block content %}
 <body>
   <div class="chat-container">
-    <h1>聊天室</h1>
-    {% if conversation.user1.id == request.user.id %}
-      <p>聊天對象：{{ conversation.user2.username }}</p>
+    <h1>{{ conversation.user2.username }}</h1>
+
+<div id="chat-box" class="chat-box">
+  {% for message_item in messages_list %}
+    {% if message_item.sender == request.user %}
+      <div class="message-wrapper right">
+        <!-- 移除右側的使用者名稱 -->
+        <div class="message right">
+          <div class="message-content">{{ message_item.content }}</div>
+          <div class="message-time right">{{ message_item.timestamp|date:"H:i" }}</div>
+        </div>
+      </div>
     {% else %}
-      <p>聊天對象：{{ conversation.user1.username }}</p>
+      <div class="message-wrapper left">
+        <div class="message-sender left">{{ message_item.sender.username }}</div>
+        <div class="message left">
+          <div class="message-content">{{ message_item.content }}</div>
+          <div class="message-time left">{{ message_item.timestamp|date:"H:i" }}</div>
+        </div>
+      </div>
     {% endif %}
-
-
-    <div id="chat-box" class="chat-box">
-      <!-- 現有訊息可由伺服器渲染，也可以僅靠 WebSocket 即時加入 -->
-      {% for message_item in messages_list %}  {# <<< 從 'messages' 改為 'messages_list' #}
-        {% if message_item.sender == request.user %}  {# <<< User 對象與 User 對象比較 #}
-          <div class="message right">
-            <strong>{{ message_item.sender.username }}:</strong><br> {# <<< 顯式使用 username #}
-            {{ message_item.content }}
-          </div>
-        {% else %}
-          <div class="message left">
-            <strong>{{ message_item.sender.username }}:</strong><br> {# <<< 顯式使用 username #}
-            {{ message_item.content }}
-          </div>
-        {% endif %}
-      {% empty %}
-        <p>尚無訊息</p>
-      {% endfor %}
-    </div>
-
+  {% empty %}
+    <p>尚無訊息</p>
+  {% endfor %}
+</div>
     <!-- 輸入訊息表單 -->
-    <form id="chat-form">
+    <form id="chat-form" class="chat-input-container">
       {% csrf_token %}
-      <textarea id="message-input" rows="3" cols="50" placeholder="請輸入訊息..."></textarea><br>
+      <textarea id="message-input" rows="3" cols="50" placeholder="請輸入訊息..."></textarea>
       <button type="submit">送出</button>
     </form>
   </div>
@@ -62,36 +60,57 @@
 
   const chatSocket = new WebSocket(socketUrl);
 
-  // 當連線成功建立時
-  chatSocket.onopen = function(e) {
-    console.log('WebSocket 連線已建立');
-  };
+chatSocket.onmessage = function(e) {
+  const data = JSON.parse(e.data);
+  const messageContent = data['message'];
+  const senderUsername = data['sender'];
+  const timestamp = data['timestamp']; // 從 WebSocket 接收的時間
+  const chatBox = document.getElementById('chat-box');
 
-  // 當收到訊息時，更新聊天框內容
-  chatSocket.onmessage = function(e) {
-    console.log("JS onmessage: 收到 WebSocket 數據:", e.data);
-    const data = JSON.parse(e.data);
-    const messageContent = data['message'];
-    const senderUsername = data['sender'];
-    const chatBox = document.getElementById('chat-box');
+  const messageWrapperDiv = document.createElement('div');
+  messageWrapperDiv.classList.add('message-wrapper');
 
-    // 建立新的訊息區塊
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
+  if (senderUsername === '{{ request.user.username }}') {
+    messageWrapperDiv.classList.add('right');
+  } else {
+    messageWrapperDiv.classList.add('left');
+  }
 
-    // 判斷發送者決定顯示在左或右
-    if (senderUsername === '{{ request.user.username }}') {
-      messageDiv.classList.add('right');
-    } else {
-      messageDiv.classList.add('left');
-    }
+  const senderDiv = document.createElement('div');
+  senderDiv.classList.add('message-sender');
+  senderDiv.textContent = senderUsername;
 
-    messageDiv.innerHTML = '<strong>' + senderUsername + ':</strong><br>' + messageContent;
-    chatBox.appendChild(messageDiv);
-    
-    // 自動捲到最底部
-    chatBox.scrollTop = chatBox.scrollHeight;
-  };
+  if (senderUsername === '{{ request.user.username }}') {
+    senderDiv.classList.add('right');
+  } else {
+    senderDiv.classList.add('left');
+  }
+
+  const messageDiv = document.createElement('div');
+  messageDiv.classList.add('message');
+  const contentDiv = document.createElement('div');
+  contentDiv.classList.add('message-content');
+  contentDiv.textContent = messageContent;
+
+  const timeDiv = document.createElement('div');
+  timeDiv.classList.add('message-time');
+  timeDiv.textContent = timestamp;
+
+  if (senderUsername === '{{ request.user.username }}') {
+    timeDiv.classList.add('right');
+  } else {
+    timeDiv.classList.add('left');
+  }
+
+  messageDiv.appendChild(contentDiv);
+  messageDiv.appendChild(timeDiv);
+
+  messageWrapperDiv.appendChild(senderDiv);
+  messageWrapperDiv.appendChild(messageDiv);
+
+  chatBox.appendChild(messageWrapperDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+};
   
   // 建立連線錯誤或連線關閉時的處理
   chatSocket.onerror = function(e) {
