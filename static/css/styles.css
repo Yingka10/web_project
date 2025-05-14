@@ -136,6 +136,21 @@ body {
   margin-bottom: 0.75rem;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between; /* 賣家名稱和聊天按鈕兩端對齊 */
+  align-items: center; /* 垂直置中 */
+}
+
+.card-header a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.card-header .bi-chat {
+  margin-left: 10px; /* 與賣家名稱保持適當間距 */
+}
+
 footer {
   background: #399e9c;
   color: #fff

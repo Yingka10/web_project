@@ -40,11 +40,16 @@
               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
             
             {# 賣家信息 - 在圖片上方 #}
-            <div class="card-header bg-light p-2">
-              <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
-                <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
+            <div class="card-header bg-light p-2 d-flex align-items-center justify-content-between">
+            <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
+              <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
+            </a>
+            {% if user.is_authenticated and user != product.owner and not product.is_sold %}
+              <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="text-decoration-none ms-2" onclick="event.stopPropagation();">
+                <i class="bi bi-chat fs-5 text-info"></i>
               </a>
-            </div>
+            {% endif %}
+          </div>
 
             {# 將整個卡片變成可點擊區域 #}
             <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark" style="position: relative; z-index: 1;">
@@ -82,10 +87,6 @@
                               {% else %}
                                   <i class="bi bi-heart text-danger fs-5"></i>
                               {% endif %}
-                          </a>
-                          {# 聊天按鈕，點擊後導向與賣家聊天頁面 (假設 'chat_with_seller' URL 需要賣家與商品ID) #}
-                          <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="text-decoration-none ms-2" onclick="event.stopPropagation();">
-                            <i class="bi bi-chat fs-5 text-info"></i>
                           </a>
                       </div>
                       {% endif %}

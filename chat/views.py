@@ -16,67 +16,23 @@ logger = logging.getLogger(__name__)# 獲取一個 logger 實例
 User = get_user_model()
 
 @login_required
+@login_required
 def chat_with_seller(request, seller_id, product_id):
-    # # 取得指定的賣家與商品
-    # User = get_user_model()
-    # other_user = get_object_or_404(User, id=seller_id)
-    
-    # # 嘗試取得現有對話；若無則建立一筆
-    # user1, user2 = sorted([request.user, other_user], key=lambda user: user.id)
-    # conversation, created = Conversation.objects.get_or_create(
-    #     user1=user1,
-    #     user2=user2
-    # )
-    # # 導向聊天詳情頁面
-    # return redirect('chat_detail', conversation_id=conversation.id)
-    print(f"--- Entering chat_with_seller: seller_id={seller_id}, product_id={product_id} ---") # 新增
-    User = get_user_model()
-    try:
-        other_user = get_object_or_404(User, id=seller_id)
-        print(f"--- chat_with_seller: 找到對方用戶 (賣家): {other_user} ---")
-    except User.DoesNotExist:
-        print(f"--- chat_with_seller: 找不到 ID 為 {seller_id} 的用戶 ---")
-        messages.error(request, "指定的用戶不存在。")
-        return redirect('index') # 假設 'index' 是您的首頁 URL 名稱
-    except Exception as e:
-        print(f"--- chat_with_seller: 一般錯誤: {e} ---")
-        messages.error(request, "發生未知錯誤，請稍後再試。")
-        return redirect('index')
-    
-    current_user = request.user
-    if current_user == other_user:
+    other_user = get_object_or_404(User, id=seller_id)
+    if request.user == other_user:
         messages.error(request, "您不能與自己開始聊天。")
         return redirect('index')
 
-    # 確保 user1 和 user2 的 ID 順序正確
-    user1_obj, user2_obj = (current_user, other_user) if current_user.id < other_user.id else (other_user, current_user)
+    # 確保 user1 和 user2 的順序
+    user1_obj, user2_obj = sorted([request.user, other_user], key=lambda user: user.id)
 
-    print(f"--- chat_with_seller: 嘗試取得或建立對話，用戶1={user1_obj.id}, 用戶2={user2_obj.id} ---")
-    try:
-        conversation, created = Conversation.objects.get_or_create(
-            user1=user1_obj,
-            user2=user2_obj
-            # 移除了 product
-        )
-        # 確保新建立的對話也有正確的 updated_at
-        if created:
-            conversation.updated_at = timezone.now()
-            conversation.save(update_fields=['updated_at'])
-        print(f"--- chat_with_seller: 對話 {'已建立' if created else '已找到'}: ID={conversation.id} ---")
-    except Exception as e:
-        print(f"--- chat_with_seller: 取得或建立對話時發生錯誤: {e} ---")
-        messages.error(request, "建立或取得對話失敗。")
-        return redirect('index')
+    # 嘗試取得或建立對話
+    conversation, created = Conversation.objects.get_or_create(
+        user1=user1_obj,
+        user2=user2_obj
+    )
 
-    print(f"--- chat_with_seller: 嘗試重定向至 'chat:chat_detail'，對話 ID: {conversation.id} ---")
-    try:
-        response = redirect('chat:chat_detail', conversation_id=conversation.id)
-        print(f"--- chat_with_seller: 重定向回應已建立。 ---")
-        return response
-    except Exception as e: # 例如 NoReverseMatch
-        print(f"--- chat_with_seller: 重定向至 'chat:chat_detail' 時發生錯誤: {e} ---")
-        messages.error(request, "無法開啟聊天室。")
-        return redirect('index')
+    return redirect('chat:chat_detail', conversation_id=conversation.id)
 
 @login_required
 def chat_with_buyer(request, buyer_id, product_id):
