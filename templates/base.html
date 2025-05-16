@@ -9,8 +9,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500&display=swap" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100"{% block body_attributes %}{% endblock %}>
     <!-- 導覽列 -->
     <nav class="navbar navbar-expand-lg fixed-top shadow">
         <div class="container">
@@ -55,12 +56,10 @@
         <div class="nav-item dropdown me-2 position-relative">
             <a class="nav-link notification-icon" href="{% url 'notification_list' %}" >
             🔔
-                {% if unread_count > 0 %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ unread_count }}
-                        <span class="visually-hidden">未讀通知數量</span>
-                    </span>
-                {% endif %}
+                <span id="notification-badge-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if unread_count == 0 %}d-none{% endif %}">
+                    {{ unread_count|default_if_none:"0" }}
+                    <span class="visually-hidden">未讀通知數量</span>
+                </span>
             </a>
         </div>
         
@@ -84,7 +83,7 @@
     <main class="flex-grow-1" style="padding-top: 160px;">
         <div class="container">
 
-            <!-- ✅ 訊息提示要放在這裡 -->
+        <!-- ✅ 訊息提示要放在這裡 -->
         {% if messages %}
         {% for message in messages %}
           <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -109,5 +108,144 @@
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/scripts.js' %}"></script>
+    {# *** 新增：處理彈出通知的 JavaScript *** #}
+
+    {% if user.is_authenticated %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function getCurrentConversationIdOnPage() {
+            // 從 body 的 data-current-conversation-id 獲取
+            // 如果不在聊天頁面，這個屬性可能不存在，返回 null
+            return document.body.dataset.currentConversationId || null;
+        }
+
+        let activePopupNotification = null;
+        let popupTimer = null;
+
+        function displayPopupChatNotification(data) {
+            if (activePopupNotification) {
+                activePopupNotification.remove();
+                clearTimeout(popupTimer);
+            }
+
+            const notificationPopup = document.createElement('div');
+            notificationPopup.className = 'chat-popup-notification'; // 用於 CSS 樣式
+
+            const titleElement = document.createElement('h5');
+            titleElement.textContent = data.title;
+
+            const bodyElement = document.createElement('p');
+            bodyElement.textContent = data.body;
+
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '&times;';
+            closeButton.className = 'close-btn'; // 用於 CSS 樣式
+
+            notificationPopup.appendChild(closeButton);
+            notificationPopup.appendChild(titleElement);
+            notificationPopup.appendChild(bodyElement);
+
+            document.body.appendChild(notificationPopup);
+            
+            // 強制重繪以觸發 CSS 動畫 (如果使用 class 'show' 控制動畫)
+            void notificationPopup.offsetWidth; 
+            notificationPopup.classList.add('show'); // 假設您在 CSS 中定義了 .show 的動畫
+
+            activePopupNotification = notificationPopup;
+
+            notificationPopup.addEventListener('click', function(event) {
+                if (event.target !== closeButton) {
+                    window.location.href = data.link;
+                    removePopup();
+                }
+            });
+
+            closeButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                removePopup();
+            });
+
+            popupTimer = setTimeout(removePopup, 5000); // 5 秒後自動關閉
+
+            function removePopup() {
+                if (notificationPopup) {
+                    notificationPopup.classList.remove('show'); // 觸發消失動畫
+                    // 等待動畫結束後再移除 DOM 元素
+                    setTimeout(() => {
+                        if (notificationPopup) notificationPopup.remove();
+                        activePopupNotification = null;
+                    }, 300); // 假設消失動畫時間為 0.3s
+                }
+                clearTimeout(popupTimer);
+            }
+        }
+
+        // The following code will only be rendered if the user is authenticated
+        const notificationBadgeCountElement = document.getElementById('notification-badge-count');
+
+        function updateNotificationUI(unreadCount) {
+            if (notificationBadgeCountElement) {
+                if (unreadCount > 0) {
+                    notificationBadgeCountElement.textContent = unreadCount;
+                    notificationBadgeCountElement.classList.remove('d-none');
+                } else {
+                    notificationBadgeCountElement.classList.add('d-none');
+                    notificationBadgeCountElement.textContent = '0';
+                }
+            }
+        }
+        
+        // (可選) 瀏覽器原生通知的邏輯，如果還需要的話
+        // function showBrowserNotification(title, body, link, conversationId) { ... }
+
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const host = window.location.host;
+        const notificationSocketUrl = `${protocol}${host}/ws/notifications/`; // 連接到 NotificationConsumer
+        
+        console.log('Global Notification Socket URL:', notificationSocketUrl);
+        const notificationSocket = new WebSocket(notificationSocketUrl);
+
+        notificationSocket.onopen = function(e) {
+            console.log('Global Notification WebSocket connection established.');
+        };
+
+        notificationSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log('Global Notification data received:', data);
+
+            if (data.type === 'unread_count_update') { // 處理鈴鐺計數更新
+                updateNotificationUI(data.unread_count);
+            } else if (data.type === 'new_notification') { // 處理鈴鐺旁的瀏覽器通知 (如果還需要)
+                // updateNotificationUI(data.unread_count);
+                // if (data.sender_username && data.notification_text && data.notification_link && data.conversation_id) {
+                //     const title = `來自 ${data.sender_username} 的新訊息`;
+                //     showBrowserNotification(title, data.notification_text, data.notification_link, data.conversation_id);
+                // }
+            } else if (data.type === 'show_chat_popup_notification') { // 處理彈出式聊天通知
+                const currentConvIdOnPage = getCurrentConversationIdOnPage();
+                console.log("Popup check: currentConvIdOnPage:", currentConvIdOnPage, "notification's conversation_id:", data.conversation_id);
+                if (String(data.conversation_id) !== String(currentConvIdOnPage)) {
+                    console.log("Displaying chat popup notification.");
+                    displayPopupChatNotification(data);
+                } else {
+                    console.log("User is currently in the target conversation, chat popup suppressed.");
+                    // (可選) 如果用戶在當前聊天室，可以考慮更新頁面標題等方式提示新訊息
+                    // document.title = "(*) " + originalTitle; // 假設 originalTitle 已保存
+                }
+            }
+        };
+
+        notificationSocket.onclose = function(e) {
+            console.error('Global Notification WebSocket closed unexpectedly. Code:', e.code, 'Reason:', e.reason);
+            // (可選) 嘗試重連
+        };
+
+        notificationSocket.onerror = function(err) {
+            console.error('Global Notification WebSocket error:', err);
+        };
+    });
+    </script>
+    {% endif %}
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -102,7 +102,7 @@
                               <a href="{% url 'chat:chat_detail' conv_item.conversation_id %}" class="list-group-item list-group-item-action flex-column align-items-start position-relative"> {# <--- 添加 position-relative #}
                                 <div class="d-flex w-100 justify-content-between">
                                     <h5 class="mb-1">
-                                        {% blocktrans with username=conv_item.other_user_username %}與 {{ username }} 的對話{% endblocktrans %}
+                                        {% blocktrans with username=conv_item.other_user_username %} {{ username }} {% endblocktrans %}
                                     </h5>
                                     {% if conv_item.has_actual_message %}
                                         <small class="text-muted">{{ conv_item.last_message_timestamp|timesince }} {% translate "ago" %}</small>

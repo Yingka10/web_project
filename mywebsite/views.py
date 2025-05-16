@@ -32,7 +32,7 @@ def chat(request, role, chat_with_id, product_id):
         # 當前使用者為買家，對話對象為賣家
         actual_seller_id = chat_with.id
     else:
-        messages.error(request, "不合法的聊天室參數。")
+        #messages.error(request, "不合法的聊天室參數。")
         return redirect('homepage')
     
     if request.method == "POST":
@@ -104,10 +104,10 @@ def toggle_favorite(request, id):
     # 如果目前使用者已收藏此商品，就移除；否則加入收藏
     if request.user in product.favorites.all():
         product.favorites.remove(request.user)
-        messages.success(request, "✅ 已從收藏移除。")
+        #messages.success(request, "✅ 已從收藏移除。")
     else:
         product.favorites.add(request.user)
-        messages.success(request, "✅ 已加入收藏！")
+        #messages.success(request, "✅ 已加入收藏！")
     # 重導回前一個頁面
     return redirect(request.META.get('HTTP_REFERER', 'index'))
 

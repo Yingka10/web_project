@@ -2,6 +2,8 @@
 {% load static %}
 {% block title %}聊天室{% endblock %}
 
+{% block body_attributes %}data-current-conversation-id="{{ conversation.id }}"{% endblock %}
+
 {% block content %}
 <body>
   <div class="chat-container">
@@ -41,14 +43,15 @@
 <script>
     window.onload = function() {
     const chatBox = document.getElementById('chat-box');
-    chatBox.scrollTop = chatBox.scrollHeight;
+   if (chatBox) { 
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
   };
   // 根據使用者角色決定房間名稱前綴
-  const roomPrefix = "{% if conversation.user1.id == request.user.id %}chat_buyer{% else %}chat_seller{% endif %}";
+  const currentConversationIdFromPage = document.body.dataset.currentConversationId;
   const roomID = "{{ conversation.id }}";
-  const roomName = roomPrefix + '_' + roomID;
 
-  // 利用 console.log 印出 roomID，方便在瀏覽器中檢查它是否正確
+  console.log("Page's currentConversationId:", currentConversationIdFromPage);
   console.log("Generated roomID:", roomID);
 
   const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
@@ -67,27 +70,27 @@ chatSocket.onmessage = function(e) {
   const timestamp = data['timestamp']; // 從 WebSocket 接收的時間
   const chatBox = document.getElementById('chat-box');
 
+  if (!chatBox) return; // *** 新增：如果 chatBox 不存在則不繼續 ***
+
   const messageWrapperDiv = document.createElement('div');
   messageWrapperDiv.classList.add('message-wrapper');
 
-  if (senderUsername === '{{ request.user.username }}') {
-    messageWrapperDiv.classList.add('right');
-  } else {
-    messageWrapperDiv.classList.add('left');
-  }
-
-  const senderDiv = document.createElement('div');
-  senderDiv.classList.add('message-sender');
-  senderDiv.textContent = senderUsername;
-
-  if (senderUsername === '{{ request.user.username }}') {
-    senderDiv.classList.add('right');
-  } else {
-    senderDiv.classList.add('left');
-  }
-
-  const messageDiv = document.createElement('div');
+  const messageDiv = document.createElement('div'); // *** 簡化結構，只用一個 message div ***
   messageDiv.classList.add('message');
+
+  if (senderUsername === '{{ request.user.username }}') {
+      messageWrapperDiv.classList.add('right');
+      messageDiv.classList.add('right'); // 訊息本身也靠右
+  } else {
+      messageWrapperDiv.classList.add('left');
+      messageDiv.classList.add('left'); // 訊息本身也靠左
+      // *** 新增：如果不是自己發的，才顯示發送者名稱 ***
+      const senderDiv = document.createElement('div');
+      senderDiv.classList.add('message-sender', 'left');
+      senderDiv.textContent = senderUsername;
+      messageWrapperDiv.appendChild(senderDiv);
+   }
+
   const contentDiv = document.createElement('div');
   contentDiv.classList.add('message-content');
   contentDiv.textContent = messageContent;
@@ -104,8 +107,6 @@ chatSocket.onmessage = function(e) {
 
   messageDiv.appendChild(contentDiv);
   messageDiv.appendChild(timeDiv);
-
-  messageWrapperDiv.appendChild(senderDiv);
   messageWrapperDiv.appendChild(messageDiv);
 
   chatBox.appendChild(messageWrapperDiv);
@@ -120,23 +121,29 @@ chatSocket.onmessage = function(e) {
     console.error('聊天室連線意外中斷');
   };
 
+  const chatForm = document.getElementById('chat-form');
+
   // 發送訊息
-  document.getElementById('chat-form').onsubmit = function(e) {
-    e.preventDefault();
-    const messageInputDom = document.getElementById('message-input');
-    const messageToSend = messageInputDom.value;
-    if (messageToSend.trim() === '') {
-      return;
+  if (chatForm) { // *** 新增：檢查表單是否存在 ***
+        chatForm.onsubmit = function(e) {
+            e.preventDefault();
+            const messageInputDom = document.getElementById('message-input');
+            if (!messageInputDom) return; // *** 新增：檢查輸入框是否存在 ***
+
+            const messageToSend = messageInputDom.value;
+            if (messageToSend.trim() === '') {
+                return;
+            }
+            if (chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.send(JSON.stringify({
+                    'message': messageToSend,
+                    // 'sender': '{{ request.user.username }}' // 發送者由後端 Consumer 的 scope 決定，前端不需發送
+                }));
+                messageInputDom.value = '';
+            } else {
+                console.error('Chat WebSocket 連線尚未開啟或已關閉');
+            }
+        };
     }
-    // 確認 WebSocket 連線狀態是否處於開啟狀態
-    if (chatSocket.readyState === WebSocket.OPEN) {
-      chatSocket.send(JSON.stringify({
-        'message': messageToSend,
-      }));
-      messageInputDom.value = '';
-    } else {
-      console.error('WebSocket 連線尚未開啟或已關閉');
-    }
-  };
 </script>
 {% endblock %}

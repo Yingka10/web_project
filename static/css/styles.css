@@ -237,3 +237,66 @@ footer {
 #chat-form button {
   align-self: flex-end; /* 按鈕靠右對齊 */
 }
+
+/* 彈出式聊天通知樣式 */
+.chat-popup-notification {
+    position: fixed;
+    bottom: 20px; /* 或者 top: 20px; */
+    right: 20px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-left: 5px solid #0d6efd; /* Bootstrap primary color */
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 1070; /* 比 Bootstrap modal (1050) 和 navbar (1030) 更高 */
+    width: 320px;
+    max-width: 90%;
+    cursor: pointer;
+    font-family: 'Noto Serif TC', serif; /* 與您網站字體一致 */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateX(100%); /* 初始從右側滑入 */
+}
+
+.chat-popup-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.chat-popup-notification h5 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1rem; /* 16px */
+    font-weight: 600;
+    color: #333;
+}
+
+.chat-popup-notification p {
+    margin-bottom: 0;
+    font-size: 0.875rem; /* 14px */
+    color: #555;
+    line-height: 1.5;
+    word-wrap: break-word;
+    max-height: 60px; /* 限制內容高度，例如約 3 行 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-popup-notification .close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem; /* 24px */
+    font-weight: bold;
+    color: #999;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    opacity: 0.7;
+}
+.chat-popup-notification .close-btn:hover {
+    color: #000;
+    opacity: 1;
+}

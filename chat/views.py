@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)# 獲取一個 logger 實例
 User = get_user_model()
 
 @login_required
-@login_required
 def chat_with_seller(request, seller_id, product_id):
     other_user = get_object_or_404(User, id=seller_id)
     if request.user == other_user:
