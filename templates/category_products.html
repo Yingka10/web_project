@@ -37,17 +37,23 @@
             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)';"
             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
 
-          {# 賣家信息 - 在圖片上方 #}
-          <div class="card-header bg-light p-2">
-            {# 確保 product.owner 存在 #}
-            {% if product.owner %}
-              <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
-                <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
-              </a>
-            {% else %}
-               <span class="text-muted"><i class="bi bi-person-circle me-1"></i> 未知賣家</span>
-            {% endif %}
-          </div>
+        {# 賣家信息 - 在圖片上方 #}
+        <div class="card-header bg-light p-2 d-flex align-items-center justify-content-between">
+        <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
+          <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
+        </a>
+        {% if user.is_authenticated and user != product.owner and not product.is_sold %}
+          <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="text-decoration-none ms-2" onclick="event.stopPropagation();">
+            <i class="bi bi-chat fs-5 text-info"></i>
+          </a>
+        {% endif %}
+        </div>
+
+          {# 已售出徽章 #}
+          {% if product.is_sold %}
+            <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 2; transform: rotate(-15deg);">已售出</span>
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="z-index: 1;"></div>
+          {% endif %}
 
           {# 將整個卡片變成可點擊區域 #}
           <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark" style="position: relative; z-index: 1;">

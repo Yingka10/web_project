@@ -87,6 +87,11 @@
                 <a href="{% url 'seller_profile' product.owner.id %}">
                     {{ product.owner.username }}
                 </a>
+                {% if user.is_authenticated and user != product.owner %}
+                    <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="btn btn-outline-secondary btn-sm ms-2">
+                        <i class="bi bi-chat-dots"></i> 與賣家聊天
+                    </a>
+                {% endif %}
             </p>
             {% endif %}
             <p class="text-muted small">發布時間: {{ product.pub_date|date:"Y/m/d H:i" }}</p>
@@ -96,8 +101,8 @@
                     {% if user.is_authenticated %}
                         {% if user != product.owner %}
                             {% if user in product.favorites.all %}
-                                <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-danger">
-                                   <i class="bi bi-heart-fill"></i> 取消收藏
+                                <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none">
+                                   <i class="bi bi-heart text-danger fs-5"></i> 取消收藏
                                 </a>
                             {% else %}
                                  <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-primary">

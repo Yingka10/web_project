@@ -117,6 +117,55 @@ body {
   transition: all 0.1s ease;
 }
 
+/* 通用按鈕樣式 */
+.btn-custom {
+  color: white; /* 按鈕文字顏色 */
+  background-color: #399e9c; /* 按鈕背景顏色 */
+  font-size: 16px; /* 調整字體大小 */
+  padding: 10px 20px; /* 調整內邊距 */
+  transition: all 0.3s ease; /* 增加過渡效果 */
+}
+
+.btn-custom:hover {
+  background-color: #2e7d6d; /* 滑鼠懸停時背景變深 */
+  border-color: #2e7d6d; /* 邊框顏色變深 */
+  color: white; /* 保持文字為白色 */
+}
+
+.btn-custom:active {
+  background-color: #1f5a4a; /* 點擊時背景更深 */
+  border-color: #1f5a4a;
+  color: white;
+}
+
+/* 輸入框樣式 */
+.form-control {
+  background-color: #f8f3e0; /* 與頁面背景一致 */
+  color: black; /* 文字顏色 */
+  border: 1px solid black; /* 黑色邊框 */
+  box-shadow: none; /* 移除陰影 */
+}
+
+.form-control:focus {
+  background-color: #f8f3e0; /* 聚焦時背景保持一致 */
+  color: black; /* 聚焦時文字顏色 */
+  border-color: #399e9c; /* 聚焦時邊框顏色 */
+  box-shadow: none; /* 移除預設的藍色陰影 */
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #f8f3e0 inset !important; /* 強制背景色 */
+  -webkit-text-fill-color: #333 !important; /* 文字顏色 */
+}
+
 /* 商品卡片 */
 .product-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -149,6 +198,11 @@ body {
 
 .card-header .bi-chat {
   margin-left: 10px; /* 與賣家名稱保持適當間距 */
+}
+
+.card-header-custom {
+    background-color: #399e9c; /* 自定義背景顏色 */
+    color: white; /* 文字顏色 */
 }
 
 footer {
