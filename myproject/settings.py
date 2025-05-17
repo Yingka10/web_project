@@ -48,16 +48,14 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'myproject.asgi.application'
 
 # 設定 Channels layer，建議使用 Redis 作後台
-redis_url = os.environ.get('REDIS_URL')
-url = urlparse.urlparse(redis_url)
-
+redis_url = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379")
+parsed_url = urlparse.urlparse(redis_url)
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            #"hosts": [os.environ.get("REDIS_URL")],
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [redis_url],
         },
     },
 }
@@ -73,7 +71,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://webproject-ncu.up.railway.app','https://ncu-second-hand.onrender.com/']
+CSRF_TRUSTED_ORIGINS = [
+    'https://webproject-ncu.up.railway.app',
+    'https://ncu-second-hand.onrender.com',
+]
 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
