@@ -50,9 +50,12 @@ body {
   background-color: #c1402f; 
   border-color: #c1402f;
 }
-.form-control {
+
+.custom-search-box {
   color: #2e3236; 
+  background-color: #fff !important;
 }
+
 .notification-icon {
   font-size: 26px;
 }
@@ -167,7 +170,8 @@ select:-webkit-autofill:focus {
 }
 
 /* 商品卡片 */
-.product-card {
+.product-card, .card-header {
+  background-color: #f2f2f2;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -189,6 +193,7 @@ select:-webkit-autofill:focus {
   display: flex;
   justify-content: space-between; /* 賣家名稱和聊天按鈕兩端對齊 */
   align-items: center; /* 垂直置中 */
+  color: #315851;
 }
 
 .card-header a {
@@ -203,6 +208,9 @@ select:-webkit-autofill:focus {
 .card-header-custom {
     background-color: #399e9c; /* 自定義背景顏色 */
     color: white; /* 文字顏色 */
+}
+.card-text{
+  color:#5e625d;
 }
 
 footer {
