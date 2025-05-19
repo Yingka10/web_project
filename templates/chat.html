@@ -7,7 +7,11 @@
 {% block content %}
 <body>
   <div class="chat-container">
-    <h1>{{ conversation.user2.username }}</h1>
+    <h1>{% if conversation.user1 == request.user %}
+            {{ conversation.user2.username }}
+        {% else %}
+            {{ conversation.user1.username }}
+        {% endif %}</h1>
 
 <div id="chat-box" class="chat-box">
   {% for message_item in messages_list %}
