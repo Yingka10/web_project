@@ -80,7 +80,9 @@
             </p>
             {% endif %}
             <p class="text-primary fs-4 {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
-            <p>{{ product.body }}</p>
+            <p class="text-break" style="max-width: 400px;">
+                {{ product.body }}
+            </p>
             {% if product.owner %}
             <p class="text-muted">
                 賣家:
