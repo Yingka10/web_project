@@ -143,7 +143,7 @@ body {
 
 /* 輸入框樣式 */
 .form-control {
-  background-color: #f8f3e0; /* 與頁面背景一致 */
+  background-color: #f1f1f1; /* 與頁面背景一致 */
   color: black; /* 文字顏色 */
   border: 1px solid black; /* 黑色邊框 */
   box-shadow: none; /* 移除陰影 */
