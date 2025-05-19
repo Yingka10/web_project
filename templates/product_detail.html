@@ -50,7 +50,7 @@
                 <div class="carousel-inner rounded">
                     {% for image in product_images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ image.image.url }}" class="d-block w-100" style="height: 450px; object-fit: contain; background-color: #f8f9fa;" alt="{{ product.title }} - 圖片 {{ forloop.counter }}">
+                        <img src="{{ image.image.url }}" class="d-block w-100" style="height: 350px; object-fit: contain; background-color: #f8f9fa;" alt="{{ product.title }} - 圖片 {{ forloop.counter }}">
                     </div>
                     {% endfor %}
                 </div>
