@@ -83,8 +83,8 @@
                     <div class="d-flex align-items-center" style="z-index: 10; position: relative;">
 
                         {# 收藏愛心按鈕 #}
-                        <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation();"> {# onclick 防止點擊愛心觸發卡片連結 #}
-                            {% if user in product.favorites.all %}
+                        <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation(); return true;"> {# onclick 防止點擊愛心觸發卡片連結 #}
+                            {% if product.is_favorited_by_user %}
                                 <i class="bi bi-heart-fill text-danger fs-5"></i>
                             {% else %}
                                 <i class="bi bi-heart text-danger fs-5"></i>

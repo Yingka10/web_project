@@ -45,7 +45,7 @@
                             <div id="image-inputs-container">
                                 <div class="input-group mb-2">
                                     <input type="file" class="form-control" name="images" accept="image/*" required>
-                                    <button type="button" class="btn btn-outline-danger" disabled style="visibility: hidden;">
+                                    <button type="button" class="btn btn-outline-danger ms-2" disabled style="visibility: hidden;">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -95,7 +95,7 @@
     
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
-                removeBtn.classList.add('btn', 'btn-outline-danger');
+                removeBtn.classList.add('btn', 'btn-outline-danger', 'ms-2');
                 removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
                 removeBtn.addEventListener('click', function() {
                     newImageInputDiv.remove();

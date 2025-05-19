@@ -70,12 +70,12 @@ class Post(models.Model):
         null=True,
         blank=True
     )
-    favorites = models.ManyToManyField(
-        CustomUser,
-        blank=True,
-        related_name='favorited_posts',
-        verbose_name="收藏的使用者"
-    )
+    # favorites = models.ManyToManyField(
+    #     CustomUser,
+    #     blank=True,
+    #     related_name='favorited_posts',
+    #     verbose_name="收藏的使用者"
+    # )
     owner = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
