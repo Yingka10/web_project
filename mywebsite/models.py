@@ -154,3 +154,9 @@ class Notification(models.Model):
     def __str__(self):
         return f"通知給 {self.user.username}: {self.message}"
 
+class Review(models.Model):
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='given_reviews')
+    rating = models.PositiveSmallIntegerField()  # 1~5 分
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)

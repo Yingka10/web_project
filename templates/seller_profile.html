@@ -106,4 +106,49 @@
         <p>這位賣家目前沒有已售出的商品。</p>
     {% endfor %}
 </div>
+
+<hr class="mt-5">
+<h3 class="mb-4">賣家評價 <i class="bi bi-star-fill text-warning"></i></h3>
+
+{% if avg_rating %}
+    <p class="text-warning">⭐ 平均評分：{{ avg_rating|floatformat:1 }} / 5</p>
+{% else %}
+    <p class="text-muted">尚無平均評分</p>
+{% endif %}
+
+<div class="row g-4">
+    {% for review in reviews %}
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-1">
+                    <i class="bi bi-person-circle"></i> {{ review.reviewer.username }}
+                </h5>
+                <p class="card-text mb-2">
+                    <i class="bi bi-chat-dots"></i> {{ review.comment|default:"（無評論內容）" }}
+                </p>
+                <div class="mb-2">
+                    <span class="text-warning">
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= review.score|add:"0" %}
+                                <i class="bi bi-star-fill"></i>
+                            {% else %}
+                                <i class="bi bi-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    <small class="text-muted ms-2">{{ review.created_at|date:"Y-m-d H:i" }}</small>
+                </div>
+                {% if review.post %}
+                    <a href="{% url 'product_detail' review.post.id %}" class="btn btn-sm btn-outline-secondary mt-auto">
+                        <i class="bi bi-box-seam"></i> 查看相關商品
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p class="text-muted">目前尚未收到任何評分。</p>
+    {% endfor %}
+</div>
 {% endblock %}

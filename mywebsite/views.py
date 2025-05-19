@@ -473,11 +473,16 @@ def seller_profile(request, seller_id):
     else:
         sold_posts = sold_posts.order_by('-pub_date')  # 預設排序
 
+    reviews = Rating.objects.filter(rated=seller).order_by('-created_at')
+    avg_rating = reviews.aggregate(Avg('score'))['score__avg']
+    
     return render(request, "seller_profile.html", {
         'seller': seller,
         'active_posts': active_posts,
         'sold_posts': sold_posts,
         'sort': sort,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
     })
 
 
