@@ -42,53 +42,53 @@
                         </ul>
                     </li>
                 </ul>
-
+            </div>
                 <!-- 搜尋列 -->
-                <form class="d-flex mx-auto" style="width: 400px;" action="{% url 'combined_search' %}" method="get">
-                    <input class="form-control me-2 custom-search-box" type="search" name="q" placeholder="搜尋商品或賣家" aria-label="搜尋">
-                    <button class="btn btn-outline-success" type="submit">搜尋</button>
-                </form>
-
-<!-- 使用者狀態 -->
-<div class="d-flex align-items-center">
-    {% if user.is_authenticated %}
-        <!-- 通知鈴鐺按鈕 -->
-        <div class="nav-item dropdown me-2 position-relative">
-            <a class="nav-link notification-icon dropdown-toggle" href="#" id="notificationDropdown" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">
-                🔔
-                <span id="notification-badge-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if unread_count == 0 %}d-none{% endif %}">
-                    {{ unread_count|default_if_none:"0" }}
-                    <span class="visually-hidden">未讀通知數量</span>
-                </span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="min-width: 300px;">
-                {% for notification in recent_notifications %}
-                    <li>
-                        <a class="dropdown-item small" href="{{ notification.link }}">
-                            {{ notification.message|truncatechars:40 }}
+            <form class="d-flex mx-auto nav-search-form" action="{% url 'combined_search' %}" method="get" autocomplete="off">
+                <input class="form-control nav-search-input" type="search" name="q" placeholder="搜尋商品或賣家" aria-label="搜尋">
+                <button class="btn nav-search-btn" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+            <!-- 使用者狀態 -->
+            <div class="d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <!-- 通知鈴鐺按鈕 -->
+                    <div class="nav-item dropdown me-2 position-relative">
+                        <a class="nav-link notification-icon dropdown-toggle" href="#" id="notificationDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                            🔔
+                            <span id="notification-badge-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if unread_count == 0 %}d-none{% endif %}">
+                                {{ unread_count|default_if_none:"0" }}
+                                <span class="visually-hidden">未讀通知數量</span>
+                            </span>
                         </a>
-                    </li>
-                {% empty %}
-                    <li><span class="dropdown-item-text text-muted">目前沒有通知</span></li>
-                {% endfor %}
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-center" href="{% url 'notification_list' %}">查看所有通知</a></li>
-            </ul>
-        </div>
-        
-        <a href="{% url 'profile' %}" class="btn btn-outline-dark ms-2">個人頁面</a>
-        <form action="{% url 'logout' %}" method="post" class="ms-2 d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-outline-danger">登出</button>
-        </form>
-        <a href="{% url 'sell' %}" class="btn btn-warning ms-2">出售</a>
-    {% else %}
-        <a href="{% url 'login' %}" class="btn btn-primary me-2">登入</a>
-        <a href="{% url 'register' %}" class="btn btn-secondary me-2">註冊</a>
-        <a href="{% url 'login' %}" class="btn btn-warning me-2">出售</a>
-    {% endif %}
-</div>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="min-width: 300px;">
+                            {% for notification in recent_notifications %}
+                                <li>
+                                    <a class="dropdown-item small" href="{{ notification.link }}">
+                                        {{ notification.message|truncatechars:40 }}
+                                    </a>
+                                </li>
+                            {% empty %}
+                                <li><span class="dropdown-item-text text-muted">目前沒有通知</span></li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center" href="{% url 'notification_list' %}">查看所有通知</a></li>
+                        </ul>
+                    </div>
+                    
+                    <a href="{% url 'profile' %}" class="btn btn-outline-dark ms-2">個人頁面</a>
+                    <form action="{% url 'logout' %}" method="post" class="ms-2 d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">登出</button>
+                    </form>
+                    <a href="{% url 'sell' %}" class="btn btn-warning ms-2">出售</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary me-2">登入</a>
+                    <a href="{% url 'register' %}" class="btn btn-secondary me-2">註冊</a>
+                    <a href="{% url 'login' %}" class="btn btn-warning me-2">出售</a>
+                {% endif %}
             </div>
         </div>
     </nav>
