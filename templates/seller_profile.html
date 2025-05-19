@@ -14,11 +14,7 @@
         </a>
             {% endif %}
         </h2>
-        {% if seller.average_rating %}
-            <span class="text-warning">平均分數：{{ seller.average_rating|floatformat:1 }} 星</span>
-        {% else %}
-            <span class="text-muted">暫無評分</span>
-        {% endif %}
+        
         <form method="get" class="d-flex align-items-center">
             <label for="sort" class="me-2">排序：</label>
             <select name="sort" id="sort" class="form-select" onchange="this.form.submit()" style="width: 180px;">
