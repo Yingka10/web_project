@@ -39,6 +39,10 @@
               <button class="btn btn-mg btn-outline-primary text-start" id="v-pills-sold-posts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-sold-posts" type="button" role="tab" aria-controls="v-pills-sold-posts" aria-selected="false">
                   <i class="bi bi-cart-check-fill text-secondary me-2"></i>我已售出的商品
               </button>
+               {# 選單項目 6: 給你的評分 #}
+              <button class="btn btn-mg btn-outline-primary text-start" id="v-pills-received-ratings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-received-ratings" type="button" role="tab" aria-controls="v-pills-received-ratings" aria-selected="false">
+                  <i class="bi bi-star-fill text-warning me-2"></i>給你的評分
+              </button>
           </div>
       </div>
 
@@ -313,6 +317,47 @@
                       {% endfor %}
                    </div>
               </div>
+
+              {# 內容區塊 6: 給你的評分 #}
+                <div class="tab-pane fade" id="v-pills-received-ratings" role="tabpanel" aria-labelledby="v-pills-received-ratings-tab" tabindex="0">
+                    <h2 class="mb-4">給你的評分 <i class="bi bi-star-fill text-warning"></i></h2>
+                    <div class="row g-4">
+                        {% for rating in received_ratings %}
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title mb-1">
+                                        <i class="bi bi-person-circle"></i> {{ rating.rater.username }}
+                                    </h5>
+                                    <p class="card-text mb-2">
+                                        <i class="bi bi-chat-dots"></i> {{ rating.comment|default:"（無評論內容）" }}
+                                    </p>
+                                    <div class="mb-2">
+                                        <span class="text-warning">
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= rating.score %}
+                                                    <i class="bi bi-star-fill"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+                                        <small class="text-muted ms-2">評分時間：{{ rating.created_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                    {% if rating.post %}
+                                        <a href="{% url 'product_detail' rating.post.id %}" class="btn btn-sm btn-outline-secondary mt-auto">
+                                            <i class="bi bi-box-seam"></i> 查看相關商品
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                            <p class="text-muted">目前尚未收到任何評分。</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
 
           </div> {# End tab-content #}
       </div> {# End col-md-9 #}

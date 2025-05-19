@@ -19,6 +19,7 @@ from django.db.models import Q, OuterRef, Subquery, Value, CharField, IntegerFie
 from django.db.models.functions import Coalesce
 from .models import Post, Rating 
 from chat.models import Conversation as ChatConversation, Message as ChatMessage
+from django.db.models import Avg
 
 @login_required
 def chat(request, role, chat_with_id, product_id):
@@ -169,6 +170,10 @@ def profile(request): # 您的 profile 視圖
 
     # 處理對方用戶和組裝最終數據
     conversations_for_profile_tab = []
+    
+    user_ratings = Rating.objects.filter(rated=current_user).select_related('rater')
+    average_rating = user_ratings.aggregate(Avg('score'))['score__avg'] or 0
+    received_ratings = current_user.received_ratings.select_related('rater').order_by('-created_at')
 
     for conv_obj in user_conversations_qs: # conv_obj 是 Conversation 物件，帶有 annotate 的欄位
         other_user_in_conv = conv_obj.user2 if conv_obj.user1 == current_user else conv_obj.user1
@@ -192,7 +197,8 @@ def profile(request): # 您的 profile 視圖
             'is_last_message_from_current_user': is_last_msg_from_current_user,
             'has_actual_message': has_actual_message,
             'conversation_created_at': conv_obj.created_at, # 用於沒有訊息時的排序或顯示
-            'unread_count': unread_message_count
+            'unread_count': unread_message_count,
+            
         })
     # --- 獲取對話列表結束 ---
 
@@ -203,6 +209,9 @@ def profile(request): # 您的 profile 視圖
         'sold_posts': sold_posts,
         'purchased_posts': purchased_posts,
         'conversations_for_profile_tab': conversations_for_profile_tab, # 將對話列表數據傳遞給模板
+        'user_ratings': user_ratings,
+        'average_rating': round(average_rating, 1),
+        'received_ratings': received_ratings,
         # 'user': current_user, # request.user 在模板中默認可用
     }
     return render(request, "profile.html", context)

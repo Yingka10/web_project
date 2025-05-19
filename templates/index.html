@@ -72,7 +72,9 @@
             <div class="card-body d-flex flex-column">
                   {# ... 卡片標題、價格、收藏按鈕等 ... #}
                 <h5 class="card-title">{{ product.title }}</h5>
-                <p class="card-text {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}"> 商品簡介：<br>{{ product.body|truncatewords:15 }}</p>
+                <p class="card-text {% if product.is_sold %}text-muted text-decoration-line-through{% endif %} text-truncate" style="max-width: 220px;">
+                  商品簡介：{{ product.body }}
+                </p>
                 <div class="mt-auto d-flex justify-content-between align-items-center">
                     <span class="text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">${{ product.price }}</span>
 
