@@ -52,7 +52,7 @@
           <div class="tab-content" id="v-pills-tabContent">
 
               {# 內容區塊 1: 我的收藏 #}
-              <div class="tab-pane fade show active" id="v-pills-favorites" role="tabpanel" aria-labelledby="v-pills-favorites-tab" tabindex="0">
+              <div class="tab-pane fade" id="v-pills-favorites" role="tabpanel" aria-labelledby="v-pills-favorites-tab" tabindex="0">
                   <h2 class="mb-4">我的收藏 <i class="bi bi-bookmark-heart-fill text-danger"></i></h2>
                   <div class="row g-4">
                   {% for product in favorites %}
@@ -342,7 +342,7 @@
                                                 {% endif %}
                                             {% endfor %}
                                         </span>
-                                        <small class="text-muted ms-2">評分時間：{{ rating.created_at|date:"Y-m-d H:i" }}</small>
+                                        <small class="text-muted ms-2">{{ rating.created_at|date:"Y-m-d H:i" }}</small>
                                     </div>
                                     {% if rating.post %}
                                         <a href="{% url 'product_detail' rating.post.id %}" class="btn btn-sm btn-outline-secondary mt-auto">
