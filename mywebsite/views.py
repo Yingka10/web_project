@@ -70,20 +70,42 @@ cloudinary.config(
 )
 
 def homepage(request):
-    products = Post.objects.filter(is_sold=False).prefetch_related('images').all()
     categories = Category.objects.all()
     sort = request.GET.get('sort')  # 取得排序參數
+
+    # 先定義一個基礎的查詢集
+    base_products_query = Post.objects.filter(is_sold=False).prefetch_related('images')
+
     if sort == 'price_asc':
-        products = products.order_by('price')
+        products_query = products_query.order_by('price')
     elif sort == 'price_desc':
-        products = products.order_by('-price')
+        products_query = products_query.order_by('-price')
     elif sort == 'date_desc':
-        products = products.order_by('-pub_date')  # 由新到舊
+        products_query = products_query.order_by('-pub_date')
     elif sort == 'date_asc':
-        products = products.order_by('pub_date')   # 由舊到新
+        products_query = products_query.order_by('pub_date')   # 由舊到新
+    # 如果沒有 sort 參數，則 products_query 保持其初始狀態 (可能按模型 Meta.ordering 排序)
     else:
-        products = products.all()
-       # 加這一段（計算未讀通知數量 + 撈通知）
+        # 如果 sort 參數不存在或不是預期的值，則 products_query 等於基礎查詢集
+        products_query = base_products_query
+        
+    # 將查詢集轉換為列表，以便我們可以為每個商品對象添加自定義屬性
+    # 這一步會執行數據庫查詢
+    product_list_for_template = list(products_query)
+
+    if request.user.is_authenticated:
+        # 獲取當前用戶收藏的所有商品的 ID 集合，方便快速查找
+        favorite_post_ids = set(request.user.favorite_posts.values_list('id', flat=True))
+        
+        for product_item in product_list_for_template:
+            # 為每個商品對象添加一個名為 is_favorited_by_user 的屬性
+            product_item.is_favorited_by_user = product_item.id in favorite_post_ids
+    else:
+        # 如果用戶未登入，所有商品都標記為未收藏
+        for product_item in product_list_for_template:
+            product_item.is_favorited_by_user = False
+
+    # 加這一段（計算未讀通知數量 + 撈通知）
     unread_count = 0
     notifications = []
     if request.user.is_authenticated:
@@ -91,7 +113,7 @@ def homepage(request):
         notifications = request.user.notifications.all()[:5]  # 只撈最新5筆通知
         
     return render(request, "index.html", {
-        'products': products,
+        'products': product_list_for_template,
         'categories': categories,
         'sort': sort,  # 把目前的排序傳給模板，方便下拉選單顯示狀態
         'unread_count': unread_count,  # 加進 context
@@ -102,13 +124,14 @@ def homepage(request):
 @login_required
 def toggle_favorite(request, id):
     product = get_object_or_404(Post, id=id)
+    user = request.user
     # 如果目前使用者已收藏此商品，就移除；否則加入收藏
-    if request.user in product.favorites.all():
-        product.favorites.remove(request.user)
-        #messages.success(request, "✅ 已從收藏移除。")
+    if product in user.favorite_posts.all():
+        user.favorite_posts.remove(product)
+        #messages.success(request, f"已將「{product.title}」從收藏移除。")
     else:
-        product.favorites.add(request.user)
-        #messages.success(request, "✅ 已加入收藏！")
+        user.favorite_posts.add(product)
+        #messages.success(request, f"已將「{product.title}」加入收藏！")
     # 重導回前一個頁面
     return redirect(request.META.get('HTTP_REFERER', 'index'))
 
@@ -483,13 +506,16 @@ def seller_profile(request, seller_id):
 
 def add_to_favorites(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    user = request.user
 
-    print("登入者：", request.user)
-    print("賣家是：", post.owner)
+    # 檢查是否已經收藏，避免重複添加
+    if post not in user.favorite_posts.all():
+        user.favorite_posts.add(post) # 通過 user 的 favorite_posts 欄位添加
+        messages.success(request, "收藏成功")
+    else:
+        messages.info(request, "您已經收藏過此商品。")
+    return redirect('product_detail', post_id=post.id)
 
-    post.favorites.add(request.user)
-    messages.success(request, "收藏成功")
-    return redirect('post_detail', post_id=post.id)
 # +++ 新增 reserve_product View +++
 @login_required
 def reserve_product(request, id):
