@@ -77,13 +77,13 @@ def homepage(request):
     base_products_query = Post.objects.filter(is_sold=False).prefetch_related('images')
 
     if sort == 'price_asc':
-        products_query = products_query.order_by('price')
+        products_query = base_products_query.order_by('price')
     elif sort == 'price_desc':
-        products_query = products_query.order_by('-price')
+        products_query = base_products_query.order_by('-price')
     elif sort == 'date_desc':
-        products_query = products_query.order_by('-pub_date')
+        products_query = base_products_query.order_by('-pub_date')
     elif sort == 'date_asc':
-        products_query = products_query.order_by('pub_date')   # 由舊到新
+        products_query = base_products_query.order_by('pub_date')   # 由舊到新
     # 如果沒有 sort 參數，則 products_query 保持其初始狀態 (可能按模型 Meta.ordering 排序)
     else:
         # 如果 sort 參數不存在或不是預期的值，則 products_query 等於基礎查詢集
