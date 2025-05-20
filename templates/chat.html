@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}聊天室 - {% if conversation.user1 == request.user %}{{ conversation.user2.username }}{% else %}{{ conversation.user1.username }}{% endif %}{% endblock %}
+{% block title %}聊天室 - 中央復活2.0{% if conversation.user1 == request.user %}{{ conversation.user2.username }}{% else %}{{ conversation.user1.username }}{% endif %}{% endblock %}
 
 {% block body_attributes %}data-current-conversation-id="{{ conversation.id }}"{% endblock %}
 
