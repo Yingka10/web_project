@@ -42,10 +42,14 @@
         <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
           <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
         </a>
-        {% if user.is_authenticated and user != product.owner and not product.is_sold %}
+        {% if user.is_authenticated and user != product.owner %}
           <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="text-decoration-none ms-2" onclick="event.stopPropagation();">
             <i class="bi bi-chat fs-5 text-info"></i>
           </a>
+        {% elif user.is_authenticated and user == product.owner %}
+          <span class ="ms-2" style="visibility:hidden;">
+            <i class="bi bi-chat fs-5 text-info"></i>
+          </span>
         {% endif %}
         </div>
 
