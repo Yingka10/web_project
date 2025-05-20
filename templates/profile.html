@@ -160,14 +160,14 @@
                               <div class="card-body d-flex flex-column">
                                   <h5 class="card-title">{{ product.title }}</h5>
                                   <p class="card-text text-primary fw-bold {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
-                                  <p class="card-text small text-muted">
-                                      <i class="bi bi-clock"></i> 預約於: {{ reservation.reserved_at|date:"Y/m/d H:i" }}
-                                  </p>
                                   {% if product.owner %}
                                   <p class="card-text small text-muted">
                                       <i class="bi bi-person-circle"></i> 賣家: <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">{{ product.owner.username }}</a>
                                   </p>
                                   {% endif %}
+                                  <p class="card-text small text-muted">
+                                      <i class="bi bi-clock"></i> 預約時間: {{ reservation.reserved_at|date:"Y/m/d H:i" }}
+                                  </p>
                                   <div class="mt-auto">
                                     <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-info">
                                         <i class="bi bi-search"></i> 查看詳情
