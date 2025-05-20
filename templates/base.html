@@ -78,11 +78,7 @@
                         </ul>
                     </div>
                     
-                    <a href="{% url 'profile' %}" class="btn btn-outline-dark ms-2">個人頁面</a>
-                    <form action="{% url 'logout' %}" method="post" class="ms-2 d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger">登出</button>
-                    </form>
+                    <a class="nav-link active" href="{% url 'profile' %}">個人頁面</a>
                     <a href="{% url 'sell' %}" class="btn btn-warning ms-2">出售</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn btn-primary me-2">登入</a>

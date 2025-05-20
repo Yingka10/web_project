@@ -43,6 +43,11 @@
               <button class="btn btn-mg btn-outline-primary text-start" id="v-pills-received-ratings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-received-ratings" type="button" role="tab" aria-controls="v-pills-received-ratings" aria-selected="false">
                   <i class="bi bi-star-fill text-warning me-2"></i>給你的評分
               </button>
+              <br>
+              <form action="{% url 'logout' %}" method="post" class="mt-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">登出</button>
+              </form>
           </div>
       </div>
 

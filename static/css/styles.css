@@ -12,7 +12,12 @@ body {
 
 .navbar-nav .nav-link {
   color: #fff !important;
-  font-size: 20px;
+  font-size: 18px;
+}
+
+.nav-link{
+  color: #fff !important;
+  font-size: 18px;
 }
 
 .navbar-brand {
@@ -73,14 +78,16 @@ body {
   background: none;
 }
 
-.btn-outline-danger, .btn-outline-dark {
-  color: #fff; 
-  border-color: #fff;
-}
-.btn-outline-danger:hover, .btn-outline-dark:hover {
+.btn-outline-danger {
   color: #0d3f30; 
-  background-color: #cde0d4; ;
-  border-color: #cde0d4;
+  border-color: #0d3f30;
+  font-weight: bold;
+}
+
+.btn-outline-danger:hover{
+  color: #0d3f30; 
+  background-color: #a5cbb3; ;
+  border-color: #a5cbb3;
 }
 
 .btn-outline-success {
@@ -170,6 +177,7 @@ body {
   border-color: #e56611 !important;
   transition: all 0.1s ease;
 }
+
 
 /* 通用按鈕樣式 */
 .btn-custom {
