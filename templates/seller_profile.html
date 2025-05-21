@@ -105,14 +105,18 @@
     {% endfor %}
 </div>
 
-<hr class="mt-5">
-<h3 class="mb-4">賣家評價 <i class="bi bi-star-fill text-warning"></i></h3>
-
-{% if avg_rating %}
-    <p class="text-warning">⭐ 平均評分：{{ avg_rating|floatformat:1 }} / 5</p>
-{% else %}
-    <p class="text-muted">尚無平均評分</p>
-{% endif %}
+<div class="d-flex align-items-center justify-content-between mt-5 mb-4">
+    <h3 class="mb-0">賣家評價 <i class="bi bi-star-fill text-warning"></i></h3>
+    {% if avg_rating %}
+        <p class="text-warning mb-0 mx-auto" style="font-size: 1.2rem; font-weight: bold;">
+            ⭐ 平均評分：{{ avg_rating|floatformat:1 }} / 5
+        </p>
+    {% else %}
+        <p class="text-muted mb-0 mx-auto" style="font-size: 1.2rem;">
+            尚無平均評分
+        </p>
+    {% endif %}
+</div>
 
 <div class="row g-4">
     {% for review in reviews %}
