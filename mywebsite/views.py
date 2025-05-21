@@ -136,7 +136,11 @@ def toggle_favorite(request, id):
     return redirect(request.META.get('HTTP_REFERER', 'index'))
 
 @login_required
-def profile(request): # 您的 profile 視圖
+def profile(request, user_id=None): # 您的 profile 視圖
+    if user_id:
+        user = get_object_or_404(User, id=user_id)
+    else:
+        user = request.user
     current_user = request.user
 
     # --- 您現有的獲取其他個人頁面數據的邏輯 ---
