@@ -37,22 +37,6 @@
             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)';"
             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='';">
 
-        {# 賣家信息 - 在圖片上方 #}
-        <div class="card-header p-2 d-flex align-items-center justify-content-between">
-        <a href="{% url 'seller_profile' product.owner.id %}" class="text-decoration-none">
-          <i class="bi bi-person-circle me-1"></i>{{ product.owner.username }}
-        </a>
-        {% if user.is_authenticated and user != product.owner %}
-          <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="text-decoration-none ms-2" onclick="event.stopPropagation();">
-            <i class="bi bi-chat fs-5 text-info"></i>
-          </a>
-        {% elif user.is_authenticated and user == product.owner %}
-          <span class ="ms-2" style="visibility:hidden;">
-            <i class="bi bi-chat fs-5 text-info"></i>
-          </span>
-        {% endif %}
-        </div>
-
           {# 已售出徽章 #}
           {% if product.is_sold %}
             <span class="badge bg-danger position-absolute top-0 start-0 m-2 fs-6" style="z-index: 2; transform: rotate(-15deg);">已售出</span>
@@ -73,26 +57,44 @@
             </div>
 
             <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ product.title }}</h5>
-              <p class="card-text {% if product.is_sold %}text-muted text-decoration-line-through{% endif %} text-truncate" style="max-width: 220px;">
-                  商品簡介：{{ product.body }}
-              </p>
-              <div class="mt-auto d-flex justify-content-between align-items-center">
-                <span class="text-primary fw-bold">${{ product.price }}</span>
-
-                {% if user.is_authenticated %}
-                    <div class="d-flex align-items-center" style="z-index: 10; position: relative;">
-                      <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation(); return true;"
-                        {% if user == product.owner %} style="visibility:hidden;" {% endif %}>
-                          {% if product.is_favorited_by_user %}
-                            <i class="bi bi-heart-fill text-danger fs-5"></i>
-                          {% else %}
-                            <i class="bi bi-heart text-danger fs-5"></i>
-                          {% endif %}
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title text-truncate mb-0">{{ product.title }}</h5>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'toggle_favorite' product.id %}" 
+                          class="text-decoration-none" 
+                          onclick="event.stopPropagation(); return true;"
+                          {% if user == product.owner %} style="visibility:hidden;" {% endif %}>
+                            {% if product.is_favorited_by_user %}
+                                <i class="bi bi-heart-fill text-danger fs-5"></i>
+                            {% else %}
+                                <i class="bi bi-heart text-danger fs-5"></i>
+                            {% endif %}
                         </a>
-                    </div>
-                {% endif %}
-              </div>
+                    {% endif %}
+                </div>
+
+                <div class="price mb-2">NT${{ product.price }}</div>
+
+                <p class="card-text text-truncate">
+                    {{ product.body }}
+                </p>
+
+                <div class="bottom-container mt-auto">
+                    <a href="{% url 'seller_profile' product.owner.id %}" 
+                      class="seller"
+                      onclick="event.stopPropagation();">
+                        <i class="bi bi-person-circle me-1"></i>
+                        {{ product.owner.username }}
+                    </a>
+                    {% if user.is_authenticated and user != product.owner %}
+                        <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" 
+                          class="contact-seller-btn"
+                          onclick="event.stopPropagation();">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>聯絡賣家</span>
+                        </a>
+                    {% endif %}
+                </div>
             </div>
           </a>
         </div>

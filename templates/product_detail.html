@@ -70,70 +70,58 @@
             {% endif %}
             {% endwith %}
         </div>
-        <div class="col-md-6">
-            <h1 class="mb-3">{{ product.title }}</h1>
-            {% if product.category %}
-            <p class="text-muted">分類:
-                <a href="{% url 'category_products' product.category.id %}">
-                    {{ product.category.name }}
-                </a>
-            </p>
-            {% endif %}
-            <p class="text-primary fs-4 {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">價格: ${{ product.price }}</p>
-            <p class="text-break" style="max-width: 400px;">
-                {{ product.body }}
-            </p>
-            {% if product.owner %}
-            <p class="text-muted">
-                賣家:
-                <a href="{% url 'seller_profile' product.owner.id %}">
-                    {{ product.owner.username }}
-                </a>
-                {% if user.is_authenticated and user != product.owner %}
-                    <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="btn btn-outline-secondary btn-sm ms-2">
-                        <i class="bi bi-chat-dots"></i> 與賣家聊天
-                    </a>
+        <div class="col-md-6 product-detail">
+            <h1>{{ product.title }}</h1>
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="price {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">
+                    NT${{ product.price }}
+                </div>
+                {% if user.is_authenticated %}
+                    {% if user != product.owner %}
+                    <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation(); return true;">
+                        {% if product.is_favorited_by_user %}
+                            <i class="bi bi-heart-fill text-danger fs-5"></i>
+                        {% else %}
+                            <i class="bi bi-heart text-danger fs-5"></i>
+                        {% endif %}
+                    </a> 
+                    {% endif %}
                 {% endif %}
-            </p>
-            {% endif %}
-            <p class="text-muted small">發布時間: {{ product.pub_date|date:"Y/m/d H:i" }}</p>
+            </div>
 
-            <div class="d-flex flex-wrap gap-2 mt-4">
+            <div class="description">
+                {{ product.body }}
+            </div>
+            
+            <div class="seller-info">
+                {% if product.owner %}
+                <div class="d-flex align-items-center justify-content-left">                
+                    <span class="text-muted">賣家：</span>
+                    <a href="{% url 'seller_profile' product.owner.id %}" class="seller-link">
+                        {{ product.owner.username }}
+                    </a>
+                </div>
+                {% endif %}
+                <p class="date-info">
+                    發布時間：{{ product.pub_date|date:"Y/m/d H:i" }}
+                </p>
+            </div>
+
+            <div class="product-actions">
                 {% if not product.is_sold %}
                     {% if user.is_authenticated %}
                         {% if user != product.owner %}
-                            <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation(); return true;">
-                                {% if product.is_favorited_by_user %}
-                                    <i class="bi bi-heart-fill text-danger fs-5"></i>
-                                {% else %}
-                                    <i class="bi bi-heart text-danger fs-5"></i>
-                                {% endif %}
-                            </a>
-                        {% endif %}
-                    {% else %}
-                        <a href="{% url 'login' %}?next={{ request.path }}" class="text-decoration-none">
-                            <i class="bi bi-heart text-danger fs-5"></i>
-                        </a>
-                    {% endif %}
-                {% endif %}
-                {% if user.is_authenticated %}
-                    {% if not is_owner %}
-                        {% if not product.is_sold %}
                             {% if user_has_reserved %}
                                 <a href="{% url 'cancel_reservation' product.id %}" class="btn btn-warning">
                                     <i class="bi bi-calendar-x"></i> 取消預約
                                 </a>
                             {% else %}
                                 <a href="{% url 'reserve_product' product.id %}" class="btn btn-success">
-                                   <i class="bi bi-calendar-check"></i> 預約購買
+                                <i class="bi bi-calendar-check"></i> 預約購買
                                 </a>
                             {% endif %}
-                        {% else %}
-                            <button class="btn btn-secondary" disabled>商品已售出</button>
                         {% endif %}
-                    {% endif %}
-                {% else %}
-                    {% if not product.is_sold %}
+                    {% else %}
                         <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-success">
                             <i class="bi bi-box-arrow-in-right"></i> 登入以預約
                         </a>
@@ -146,6 +134,11 @@
                             <i class="bi bi-cart-x-fill"></i> 標示為已售出
                         </button>
                     </form>
+                {% endif %}
+                {% if user.is_authenticated and user != product.owner %}
+                    <a href="{% url 'chat:chat_with_seller' product.owner.id product.id %}" class="contact-btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-chat-dots"></i> 聯絡賣家
+                    </a>
                 {% endif %}
             </div>
 

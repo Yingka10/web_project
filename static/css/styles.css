@@ -38,7 +38,7 @@ body {
 }
 
 .nav-link:hover {
-  text-decoration: underline;
+  color: #e0e0e0 !important
 }
 
 .nav-link.notification-icon:hover,
@@ -56,6 +56,12 @@ body {
 }
 .navbar-brand:hover img {
   transform: scale(1.05) rotate(-2deg);
+}
+
+.dropdown-item:active, 
+.dropdown-item.active {
+  background-color: #399e9c !important;
+  color: #fff !important;
 }
 
 .nav-search-form {
@@ -174,7 +180,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(57, 158, 156, 0.3); /* 使用網站主色調 */
+  background: rgba(57, 158, 156, 0.127); /* 使用網站主色調 */
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -341,6 +347,41 @@ body {
   box-shadow: none; /* 移除預設的藍色陰影 */
 }
 
+.form-select {
+    border-color: #399e9c !important;
+    color: #315851;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-select:hover {
+    border-color: #2c7a79 !important;
+    background-color: rgba(57, 158, 156, 0.1);
+}
+
+.form-select:focus {
+    border-color: #399e9c !important;
+    box-shadow: 0 0 0 0.25rem rgba(57, 158, 156, 0.25) !important;
+    background-color: #fff;
+}
+
+/* 下拉選單選項樣式 */
+.form-select option {
+    background-color: #fff;
+    color: #315851 !important;
+}
+
+.form-select option:hover,
+.form-select option:checked {
+    background-color: #399e9c !important;
+    color: #fff !important;
+}
+
+/* 下拉箭頭顏色 */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23399e9c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -355,58 +396,187 @@ select:-webkit-autofill:focus {
 }
 
 /* 商品卡片 */
-.product-card {
-    background-color: #fcfbf6;
-    border: none !important;
-    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-    transform-origin: center bottom;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+.product-card .card-body {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    min-height: 200px;
 }
 
-.product-card:hover {
-    transform: translateY(-3px) scale(1.015) !important;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25) !important;
+.product-card .price {
+    color: #e67300;
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin-bottom: 0.8rem !important;
 }
 
-.product-card img {
-    object-fit: cover;
-    height: 200px;
-    width: 100%;
-    border-radius: 0;
-    
+.product-card .card-text {
+    color: #5e625d;
+    margin: 0;
+    font-size: 0.95rem;
 }
 
-.card-title {
-  margin-bottom: 0.75rem;
+.product-card .bottom-container {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between; /* 賣家名稱和聊天按鈕兩端對齊 */
-  align-items: center; /* 垂直置中 */
-  color: #315851;
+.product-card .seller {
+    font-size: 0.95rem;
+    color: #399e9c;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
-.card-header a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.card-header .bi-chat {
-  margin-left: 10px; /* 與賣家名稱保持適當間距 */
-}
-
-.card-header-custom {
-    background-color: #399e9c; /* 自定義背景顏色 */
-    color: white; /* 文字顏色 */
-}
-.card-text{
-  color:#5e625d;
+.product-card .contact-seller-btn {
+    flex-shrink: 0;
+    background-color: transparent;
+    color: #399e9c;
+    border: 1px solid #399e9c;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
 footer {
   background: #399e9c;
   color: #fff
+}
+
+/* 麵包屑導航樣式 */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 2rem;
+}
+
+.breadcrumb-item a {
+    color: #399e9c;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #2c7a79;
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: #666;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: #399e9c;
+}
+
+/* 商品詳情頁面樣式 */
+.product-detail {
+    padding: 0 2rem;
+}
+
+.product-detail h1 {
+    color: #000000;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.product-detail .price {
+    color: #399e9c;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.product-detail .description {
+    color: #444;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    white-space: pre-line;
+    word-wrap: break-word;
+    text-wrap: normal;
+}
+
+.product-detail .seller-info {
+    font-size: 1.1rem;
+      margin-bottom: 2rem;
+}
+
+.seller-info .seller-link {
+    color: #399e9c;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-right: 30px;
+}
+
+.seller-info .seller-link:hover {
+    color: #2c7a79;
+    margin-right: 30px;
+}
+
+.seller-info .date-info {
+    color: #666;
+    margin: 0.5rem 0 0 0;
+    font-size: 1.1rem;
+}
+
+.contact-btn {
+    background-color: #f8f3e0;
+    color: #399e9c;
+    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: 1.5px solid #399e9c;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-left: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.contact-btn:hover {
+    background-color: #399e9c;
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(57, 158, 156, 0.2);
+}
+
+.contact-btn .bi {
+    font-size: 1.1rem;
+}
+
+/* 按鈕群組樣式 */
+.product-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.product-actions .btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+}
+
+/* 商品狀態樣式 */
+.product-status {
+    margin-top: 3rem;
+    padding: 2rem;
+    border-radius: 8px;
+    background-color: #f8f9fa;
 }
 
 .chat-container {
