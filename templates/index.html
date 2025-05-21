@@ -4,11 +4,22 @@
 
 {% block content %}
 
-<section class="hero">
-    <div class="container">
-        <h1>歡迎來到中央復活福利社2.0</h1>
-        <br></br>
-        <p>你的閒置，他的寶藏，廢墟可能會有好朋友！</p>
+<section class="hero position-relative overflow-hidden">
+    <!-- 粒子背景元素 -->
+    <div class="particles">
+        <div class="particle" style="--size: 8px; --x: 15%; --y: 30%; --delay: 0s; --duration: 15s;"></div>
+        <div class="particle" style="--size: 12px; --x: 75%; --y: 20%; --delay: 3s; --duration: 18s;"></div>
+        <div class="particle" style="--size: 6px; --x: 50%; --y: 80%; --delay: 5s; --duration: 20s;"></div>
+    </div>
+    
+    <div class="container position-relative z-index-1">
+        <h1 class="hero-title animate__fadeInDown">歡迎來到中央復活福利社2.0</h1>
+        <br>
+        <p class="hero-subtitle animate__fadeInUp">你的閒置，他的寶藏，廢墟可能會有好朋友！</p>
+        <button class="btn btn-hero mt-4 animate__fadeInUp" onclick="scrollToLatest()">
+            <span>瀏覽最新商品</span>
+            <i class="bi bi-arrow-down ms-2"></i>
+        </button>
     </div>
 </section>
 
@@ -97,4 +108,13 @@
     </div>
   </div>
 </section>
+<script>
+function scrollToLatest() {
+    const latestSection = document.querySelector('.py-5');
+    latestSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+</script>
 {% endblock %}
