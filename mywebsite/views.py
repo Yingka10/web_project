@@ -300,36 +300,42 @@ def api(request):
     
 def product_detail(request, id):
     product = get_object_or_404(Post.objects.prefetch_related('images'), id=id)
-    reservations = None # 初始化為 None
-    is_owner = False # 標記當前使用者是否為擁有者
+    reservations = None
+    is_owner = False
 
-    # 檢查當前登入使用者是否為商品擁有者
-    if request.user.is_authenticated and product.owner == request.user:
-        is_owner = True
-        # 如果是擁有者，則獲取該商品的所有預約紀錄
+    # 修改收藏狀態的檢查方式
+    if request.user.is_authenticated:
+        is_owner = product.owner == request.user
+        # 直接使用 favorite_posts 關聯來檢查
+        product.is_favorited_by_user = request.user.favorite_posts.filter(id=product.id).exists()
+    else:
+        product.is_favorited_by_user = False
+
+    if is_owner:
         reservations = Reservation.objects.filter(product=product).order_by('-reserved_at')
 
     context = {
         'product': product,
         'is_owner': is_owner,
-        'reservations': reservations, # 將預約列表傳遞給模板
-        # 可以加入判斷是否已預約的邏輯
-        'user_has_reserved': False # 預設使用者未預約
+        'reservations': reservations,
+        'user_has_reserved': False
     }
 
-    # 檢查當前登入使用者是否已預約此商品
     if request.user.is_authenticated:
-        context['user_has_reserved'] = Reservation.objects.filter(product=product, user=request.user).exists()
+        context['user_has_reserved'] = Reservation.objects.filter(
+            product=product, 
+            user=request.user
+        ).exists()
 
-
-    return render(request, "product_detail.html", context) 
+    return render(request, "product_detail.html", context)
 
 def category_products(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     sort = request.GET.get('sort')
-    products_query = category.posts.filter(is_sold=False).prefetch_related('images').all()
-    categories = Category.objects.all()  
-    # 排序刊登中的商品
+    products_query = category.posts.filter(is_sold=False).prefetch_related('images')
+    categories = Category.objects.all()
+
+    # 排序邏輯
     if sort == 'price_asc':
         products = products_query.order_by('price')
     elif sort == 'price_desc':
@@ -339,11 +345,24 @@ def category_products(request, category_id):
     elif sort == 'date_asc':
         products = products_query.order_by('pub_date')
     else:
-        products = products_query.order_by('-pub_date')  # 預設排序
+        products = products_query.order_by('-pub_date')
+
+    # 將查詢集轉換為列表並處理收藏狀態
+    product_list = list(products)
+    
+    if request.user.is_authenticated:
+        # 獲取用戶的收藏商品 ID 集合
+        favorite_post_ids = set(request.user.favorite_posts.values_list('id', flat=True))
+        for product in product_list:
+            product.is_favorited_by_user = product.id in favorite_post_ids
+    else:
+        for product in product_list:
+            product.is_favorited_by_user = False
+
     return render(request, 'category_products.html', {
         'category': category,
-        'products': products,
-        'categories': categories,  # 傳給 base.html 的下拉選單用
+        'products': product_list,
+        'categories': categories,
         'sort': sort,
     })
 
@@ -449,10 +468,19 @@ def combined_search(request):
     seller_results = CustomUser.objects.none()
 
     if query:
-
+        # 先獲取商品查詢結果
         product_results = Post.objects.prefetch_related('images', 'owner').filter(
             (Q(title__icontains=query) | Q(body__icontains=query)) & Q(is_sold=False)
-        ).distinct() 
+        ).distinct()
+
+        # 處理收藏狀態
+        if request.user.is_authenticated:
+            favorite_post_ids = set(request.user.favorite_posts.values_list('id', flat=True))
+            for product in product_results:
+                product.is_favorited_by_user = product.id in favorite_post_ids
+        else:
+            for product in product_results:
+                product.is_favorited_by_user = False
  
         seller_results = CustomUser.objects.filter(username__icontains=query)
 
@@ -462,47 +490,33 @@ def combined_search(request):
         'seller_results': seller_results,
     }
 
-    return render(request, "combined_search.html", context) #
+    return render(request, "combined_search.html", context)
 
 def seller_profile(request, seller_id):
     seller = get_object_or_404(CustomUser, id=seller_id)
+    sort = request.GET.get('sort')
 
-    sort = request.GET.get('sort') 
-
-    # 獲取賣家的所有商品
+    # 獲取賣家的商品
     seller_posts = seller.posts.all()
+    active_posts = list(seller_posts.filter(is_sold=False))
+    sold_posts = list(seller_posts.filter(is_sold=True))
 
-    # 分開刊登中和已售出的商品
-    active_posts = seller_posts.filter(is_sold=False)
-    sold_posts = seller_posts.filter(is_sold=True)
-
-    # 排序刊登中的商品
-    if sort == 'price_asc':
-        active_posts = active_posts.order_by('price')
-    elif sort == 'price_desc':
-        active_posts = active_posts.order_by('-price')
-    elif sort == 'date_desc':
-        active_posts = active_posts.order_by('-pub_date')
-    elif sort == 'date_asc':
-        active_posts = active_posts.order_by('pub_date')
+    # 處理收藏狀態
+    if request.user.is_authenticated:
+        favorite_post_ids = set(request.user.favorite_posts.values_list('id', flat=True))
+        for post in active_posts:
+            post.is_favorited_by_user = post.id in favorite_post_ids
+        for post in sold_posts:
+            post.is_favorited_by_user = post.id in favorite_post_ids
     else:
-        active_posts = active_posts.order_by('-pub_date')  # 預設排序
-
-    # 排序已售出的商品
-    if sort == 'price_asc':
-        sold_posts = sold_posts.order_by('price')
-    elif sort == 'price_desc':
-        sold_posts = sold_posts.order_by('-price')
-    elif sort == 'date_desc':
-        sold_posts = sold_posts.order_by('-pub_date')
-    elif sort == 'date_asc':
-        sold_posts = sold_posts.order_by('pub_date')
-    else:
-        sold_posts = sold_posts.order_by('-pub_date')  # 預設排序
+        for post in active_posts:
+            post.is_favorited_by_user = False
+        for post in sold_posts:
+            post.is_favorited_by_user = False
 
     reviews = Rating.objects.filter(rated=seller).order_by('-created_at')
     avg_rating = reviews.aggregate(Avg('score'))['score__avg']
-    
+
     return render(request, "seller_profile.html", {
         'seller': seller,
         'active_posts': active_posts,

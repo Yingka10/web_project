@@ -102,19 +102,17 @@
                 {% if not product.is_sold %}
                     {% if user.is_authenticated %}
                         {% if user != product.owner %}
-                            {% if user in product.favorites.all %}
-                                <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none">
-                                   <i class="bi bi-heart text-danger fs-5"></i> 取消收藏
-                                </a>
-                            {% else %}
-                                 <a href="{% url 'toggle_favorite' product.id %}" class="btn btn-outline-primary">
-                                    <i class="bi bi-heart"></i> 加入收藏
-                                 </a>
-                            {% endif %}
+                            <a href="{% url 'toggle_favorite' product.id %}" class="text-decoration-none" onclick="event.stopPropagation(); return true;">
+                                {% if product.is_favorited_by_user %}
+                                    <i class="bi bi-heart-fill text-danger fs-5"></i>
+                                {% else %}
+                                    <i class="bi bi-heart text-danger fs-5"></i>
+                                {% endif %}
+                            </a>
                         {% endif %}
                     {% else %}
-                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-primary">
-                           <i class="bi bi-heart"></i> 登入以收藏
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="text-decoration-none">
+                            <i class="bi bi-heart text-danger fs-5"></i>
                         </a>
                     {% endif %}
                 {% endif %}
