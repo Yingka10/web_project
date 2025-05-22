@@ -494,12 +494,26 @@ def combined_search(request):
 
 def seller_profile(request, seller_id):
     seller = get_object_or_404(CustomUser, id=seller_id)
-    sort = request.GET.get('sort')
+    sort = request.GET.get('sort','')
 
     # 獲取賣家的商品
     seller_posts = seller.posts.all()
-    active_posts = list(seller_posts.filter(is_sold=False))
-    sold_posts = list(seller_posts.filter(is_sold=True))
+    active_posts = seller_posts.filter(is_sold=False)
+    sold_posts = seller_posts.filter(is_sold=True)
+
+    # 排序邏輯
+    if sort == 'price_asc':
+        active_posts = active_posts.order_by('price')
+        sold_posts = sold_posts.order_by('price')
+    elif sort == 'price_desc':
+        active_posts = active_posts.order_by('-price')
+        sold_posts = sold_posts.order_by('-price')
+    elif sort == 'date_asc':
+        active_posts = active_posts.order_by('pub_date')
+        sold_posts = sold_posts.order_by('pub_date')
+    elif sort == 'date_desc':
+        active_posts = active_posts.order_by('-pub_date')
+        sold_posts = sold_posts.order_by('-pub_date')
 
     # 處理收藏狀態
     if request.user.is_authenticated:
