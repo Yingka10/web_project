@@ -113,11 +113,7 @@
                                     <h5 class="mb-1">
                                         {% blocktrans with username=conv_item.other_user_username %} {{ username }} {% endblocktrans %}
                                     </h5>
-                                    {% if conv_item.has_actual_message %}
-                                        <small class="text-muted">{{ conv_item.last_message_timestamp|timesince }} {% translate "ago" %}</small>
-                                    {% else %}
-                                        <small class="text-muted">{{ conv_item.conversation_created_at|timesince }} {% translate "ago" %} ({% translate "New" %})</small>
-                                    {% endif %}
+
                                 </div>
                                 <p class="mb-1">
                                     {% if conv_item.has_actual_message %}
@@ -129,6 +125,13 @@
                                         <em>尚無訊息</em>
                                     {% endif %}
                                 </p>
+                                <small class="text-muted" style="position: absolute; bottom: 8px; right: 12px;">
+                                    {% if conv_item.has_actual_message %}
+                                        {{ conv_item.last_message_timestamp|timesince }} {% translate "ago" %}
+                                    {% else %}
+                                        {{ conv_item.conversation_created_at|timesince }} {% translate "ago" %} ({% translate "New" %})
+                                    {% endif %}
+                                </small>                               
                                 {# 未讀訊息徽章 #}
                                 {% if conv_item.unread_count > 0 %}
                                     <span class="badge bg-danger rounded-pill" style="position: absolute; top: 10px; right: 10px;"> {# <--- 調整樣式和定位 #}
