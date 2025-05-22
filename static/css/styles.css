@@ -1,4 +1,3 @@
-/* 自訂 CSS */
 body {
   padding-top: 70px;
   background: #f8f3e0;
@@ -6,7 +5,6 @@ body {
   font-weight: 500;
 }
 
-/* 自訂字體 */
 @font-face {
   font-family: "Noto Serif TC";
   src: url("../fonts/NotoSerifTC-Regular.ttf") format("truetype");
@@ -163,16 +161,14 @@ body {
   padding: 100px 0;
   position: relative;
   background-color: #fdfdfd;
-  transition: all 0.3s ease; /* 加入過渡效果 */
+  transition: all 0.3s ease; 
 }
 
-/* 滑鼠懸浮效果 */
 .hero:hover {
-  transform: scale(1.01); /* 輕微放大 */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+  transform: scale(1.01); 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); 
 }
 
-/* 背景圖片漸變效果 */
 .hero::before {
   content: "";
   position: absolute;
@@ -180,7 +176,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(57, 158, 156, 0.127); /* 使用網站主色調 */
+  background: rgba(57, 158, 156, 0.127); 
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -189,7 +185,6 @@ body {
   opacity: 1;
 }
 
-/* 內容上浮效果 */
 .hero .container {
   position: relative;
   z-index: 1;
@@ -311,40 +306,38 @@ body {
 }
 
 
-/* 通用按鈕樣式 */
 .btn-custom {
-  color: white; /* 按鈕文字顏色 */
-  background-color: #399e9c; /* 按鈕背景顏色 */
-  font-size: 16px; /* 調整字體大小 */
-  padding: 10px 20px; /* 調整內邊距 */
-  transition: all 0.3s ease; /* 增加過渡效果 */
+  color: white; 
+  background-color: #399e9c; 
+  font-size: 16px; 
+  padding: 10px 20px; 
+  transition: all 0.3s ease; 
 }
 
 .btn-custom:hover {
-  background-color: #2e7d6d; /* 滑鼠懸停時背景變深 */
-  border-color: #2e7d6d; /* 邊框顏色變深 */
-  color: white; /* 保持文字為白色 */
+  background-color: #2e7d6d; 
+  border-color: #2e7d6d; 
+  color: white; 
 }
 
 .btn-custom:active {
-  background-color: #1f5a4a; /* 點擊時背景更深 */
+  background-color: #1f5a4a; 
   border-color: #1f5a4a;
   color: white;
 }
 
-/* 輸入框樣式 */
 .form-control {
-  background-color: #f1f1f1; /* 與頁面背景一致 */
-  color: black; /* 文字顏色 */
-  border: 1px solid black; /* 黑色邊框 */
-  box-shadow: none; /* 移除陰影 */
+  background-color: #f1f1f1; 
+  color: black; 
+  border: 1px solid black; 
+  box-shadow: none; 
 }
 
 .form-control:focus {
-  background-color: #f8f3e0; /* 聚焦時背景保持一致 */
-  color: black; /* 聚焦時文字顏色 */
-  border-color: #399e9c; /* 聚焦時邊框顏色 */
-  box-shadow: none; /* 移除預設的藍色陰影 */
+  background-color: #f8f3e0; 
+  color: black; 
+  border-color: #399e9c; 
+  box-shadow: none; 
 }
 
 .form-select {
@@ -365,7 +358,6 @@ body {
     background-color: #fff;
 }
 
-/* 下拉選單選項樣式 */
 .form-select option {
     background-color: #fff;
     color: #315851 !important;
@@ -377,7 +369,6 @@ body {
     color: #fff !important;
 }
 
-/* 下拉箭頭顏色 */
 .form-select {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23399e9c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 }
@@ -419,9 +410,8 @@ select:-webkit-autofill:focus {
 .product-card .bottom-container {
     margin-top: auto;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* 改用 space-between */
     align-items: center;
-    gap: 1rem;
 }
 
 .product-card .seller {
@@ -430,10 +420,14 @@ select:-webkit-autofill:focus {
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+}
+
+.product-card .seller i {
+    margin-right: 0.3rem;
 }
 
 .product-card .contact-seller-btn {
+    margin-left: 1rem; 
     flex-shrink: 0;
     background-color: transparent;
     color: #399e9c;
@@ -445,7 +439,16 @@ select:-webkit-autofill:focus {
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+}
+
+.product-card .bottom-container:not(:has(.contact-seller-btn)) .seller {
+    margin-right: auto; 
+}
+
+.product-card .contact-seller-btn:hover {
+    background-color: #399e9c;
+    color: #fff;
+    text-decoration: none;
 }
 
 footer {
@@ -453,7 +456,6 @@ footer {
   color: #fff
 }
 
-/* 麵包屑導航樣式 */
 .breadcrumb {
     background-color: transparent;
     padding: 0.5rem 0;
@@ -558,7 +560,6 @@ footer {
     font-size: 1.1rem;
 }
 
-/* 按鈕群組樣式 */
 .product-actions {
     display: flex;
     flex-wrap: wrap;
@@ -571,7 +572,6 @@ footer {
     font-size: 1rem;
 }
 
-/* 商品狀態樣式 */
 .product-status {
     margin-top: 3rem;
     padding: 2rem;
@@ -580,106 +580,106 @@ footer {
 }
 
 .chat-container {
-  width: 80%;
-  margin: auto;
+    width: 80%;
+    margin: auto;
 }
+
 .chat-box {
-  border: 1px solid #ccc;
-  padding: 20px;
-  min-height: 300px;
-  max-height: 400px; /* 設定最大高度 */
-  overflow-y: auto; /* 顯示垂直捲軸 */
+    border: 1px solid #ccc;
+    padding: 20px;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .message-wrapper {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column; /* 確保子元素垂直排列 */
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
 }
 
 .message-sender {
-  font-size: 0.9em;
-  margin-bottom: 5px; /* 與訊息框的間距 */
+    font-size: 0.9em;
+    margin-bottom: 5px;
 }
 
 .message-sender.right {
-  text-align: right; /* 右側訊息的名稱靠右對齊 */
+    text-align: right;
 }
 
 .message-sender.left {
-  text-align: left; /* 左側訊息的名稱靠左對齊 */
+    text-align: left;
 }
 
 .message {
-  display: inline-block; /* 讓訊息框寬度隨內容調整 */
-  padding: 10px;
-  border-radius: 5px;
-  max-width: 60%; /* 限制最大寬度 */
-  word-wrap: break-word; /* 長字串自動換行 */
+    display: inline-block;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 60%;
+    word-wrap: break-word;
 }
 
 .message.right {
-  background-color: #a0e0a0;
-  text-align: right;
-  margin-left: auto; /* 確保訊息框靠右對齊 */
+    background-color: #a0e0a0;
+    text-align: right;
+    margin-left: auto;
 }
 
 .message.left {
-  background-color: #f0f0f0;
-  text-align: left;
+    background-color: #f0f0f0;
+    text-align: left;
 }
 
 .message-time {
-  font-size: 0.8em;
-  color: #888;
-  margin-top: 5px;
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 5px;
 }
 
 .message-time.right {
-  text-align: right;
+    text-align: right;
 }
 
 .message-time.left {
-  text-align: left;
+    text-align: left;
 }
 
 .chat-input-container {
-  display: flex;
-  flex-direction: column; /* 垂直排列輸入框和按鈕 */
-  align-items: flex-end; /* 靠右對齊 */
-  margin-top: 10px; /* 與訊息框的間距 */
-  width: 100%; /* 確保容器寬度與父容器一致 */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-top: 10px;
+    width: 100%;
 }
 
 #message-input {
-  width: 100%; /* 設定輸入框寬度 */
-  max-width: 400px; /* 限制最大寬度 */
-  margin-bottom: 10px; /* 與按鈕的間距 */
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 10px;
 }
 
 #chat-form button {
-  align-self: flex-end; /* 按鈕靠右對齊 */
+    align-self: flex-end;
 }
 
-/* 彈出式聊天通知樣式 */
 .chat-popup-notification {
     position: fixed;
-    bottom: 20px; /* 或者 top: 20px; */
+    bottom: 20px;
     right: 20px;
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
-    border-left: 5px solid #399e9c; /* Bootstrap primary color */
+    border-left: 5px solid #399e9c;
     padding: 15px 20px;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    z-index: 1070; /* 比 Bootstrap modal (1050) 和 navbar (1030) 更高 */
+    z-index: 1070;
     width: 320px;
     max-width: 90%;
     cursor: pointer;
-    font-family: 'Noto Serif TC', serif; /* 與您網站字體一致 */
+    font-family: 'Noto Serif TC', serif;
     transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
     opacity: 0;
-    transform: translateX(100%); /* 初始從右側滑入 */
+    transform: translateX(100%);
 }
 
 .chat-popup-notification.show {
@@ -690,18 +690,18 @@ footer {
 .chat-popup-notification h5 {
     margin-top: 0;
     margin-bottom: 8px;
-    font-size: 1rem; /* 16px */
+    font-size: 1rem;
     font-weight: 600;
     color: #333;
 }
 
 .chat-popup-notification p {
     margin-bottom: 0;
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.875rem;
     color: #555;
     line-height: 1.5;
     word-wrap: break-word;
-    max-height: 60px; /* 限制內容高度，例如約 3 行 */
+    max-height: 60px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -712,13 +712,14 @@ footer {
     right: 10px;
     background: transparent;
     border: none;
-    font-size: 1.5rem; /* 24px */
+    font-size: 1.5rem;
     font-weight: bold;
     color: #999;
     padding: 0.25rem 0.5rem;
     line-height: 1;
     opacity: 0.7;
 }
+
 .chat-popup-notification .close-btn:hover {
     color: #000;
     opacity: 1;
