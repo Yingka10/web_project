@@ -194,7 +194,7 @@ def send_new_message_email(to_user, from_user, message, conversation_id):
         f"你收到來自 {from_user.username} 的新訊息：\n\n"
         f"{message[:50]}...\n\n"
         f"請登入網站查看完整訊息。\n"
-        f"聊天室連結: https://webproject-ncu.up.railway.app//chat/{conversation_id}/"
+        f"https://webproject-ncu.up.railway.app"
     )
     send_mail(
         subject,
