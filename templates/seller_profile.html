@@ -62,7 +62,7 @@
                             {% endif %}
                         </div>
 
-                        <div class="price mb-2">NT${{ product.price }}</div>
+                        <div class="price mb-2">NT${{ product.price|floatformat:0 }}</div>
 
                         <p class="card-text text-truncate">
                             {{ product.body }}
@@ -112,7 +112,7 @@
                         <h5 class="card-title">{{ product.title }}</h5>
                         <p class="card-text text-muted text-decoration-line-through">{{ product.body|truncatewords:15 }}</p>
                         <div class="mt-auto d-flex justify-content-between align-items-center">
-                            <span class="text-muted text-decoration-line-through fw-bold">${{ product.price }}</span>
+                            <span class="text-muted text-decoration-line-through fw-bold">${{ product.price|floatformat:0 }}</span>
                         </div>
                     </div>
                 </a>

@@ -74,7 +74,7 @@
             <h1>{{ product.title }}</h1>
             <div class="d-flex align-items-center justify-content-between">
                 <div class="price {% if product.is_sold %}text-muted text-decoration-line-through{% endif %}">
-                    NT${{ product.price }}
+                    NT${{ product.price|floatformat:0 }}
                 </div>
                 {% if user.is_authenticated %}
                     {% if user != product.owner %}

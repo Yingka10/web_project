@@ -71,7 +71,7 @@
                         </a>
                     {% endif %}
                 </div>
-                <div class="price mb-2">NT${{ product.price }}</div>
+                <div class="price mb-2">NT${{ product.price|floatformat:0 }}</div>
                 <p class="card-text text-truncate">
                     {{ product.body }}
                 </p>
