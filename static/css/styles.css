@@ -393,7 +393,18 @@ select:-webkit-autofill:focus {
     padding: 1.25rem;
     min-height: 200px;
 }
-
+.product-card .card-top{
+    max-width: 400px;
+    gap : 0rem !important;
+}
+.product-card .card-title {
+    max-width: 320px !important;
+}
+.heart{
+  width: 50px;
+  display: flex;
+  justify-content: flex-end;
+}
 .product-card .price {
     color: #004d3c;
     font-size: 1.2rem;
